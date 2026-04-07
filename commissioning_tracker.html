@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>COMECER MIP-1100 · Commissioning Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0c0f;--bg2:#111318;--bg3:#181c22;--border:#252930;
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.12);
+  --green:#10b981;--green-dim:rgba(16,185,129,0.12);
+  --red:#ef4444;--red-dim:rgba(239,68,68,0.12);
+  --blue:#3b82f6;--blue-dim:rgba(59,130,246,0.12);
+  --purple:#a855f7;--purple-dim:rgba(168,85,247,0.12);
+  --orange:#f97316;--orange-dim:rgba(249,115,22,0.12);
+  --text:#e2e8f0;--text-dim:#64748b;--text-mid:#94a3b8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;overflow-x:hidden;}
+body.view-mode .edit-only{display:none!important;}
+
+/* PIN POPUP */
+.pin-popup{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.pin-popup.open{display:flex;}
+.pin-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:28px 32px;width:320px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,0.7);}
+.pin-box-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;}
+.pin-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'Space Mono',monospace;font-size:18px;padding:10px 14px;outline:none;transition:border-color 0.15s;letter-spacing:0.2em;text-align:center;}
+.pin-input:focus{border-color:var(--amber);}
+.pin-input::placeholder{font-size:13px;letter-spacing:0.05em;color:var(--text-dim);}
+.pin-error{color:var(--red);font-size:11px;font-family:'Space Mono',monospace;min-height:14px;margin-top:7px;text-align:center;}
+.pin-actions{display:flex;gap:8px;margin-top:14px;}
+.btn-go{flex:1;background:var(--amber);color:#000;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.1em;padding:10px;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:opacity 0.15s;}
+.btn-go:hover{opacity:0.88;}
+.btn-nope{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:12px;letter-spacing:0.08em;padding:10px 16px;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all 0.15s;}
+.btn-nope:hover{border-color:var(--text-mid);color:var(--text);}
+
+/* HEADER */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;gap:18px;height:60px;position:sticky;top:0;z-index:100;}
+.header-badge{background:var(--amber);color:#000;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;letter-spacing:0.1em;border-radius:2px;user-select:none;cursor:default;}
+.header-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:0.05em;color:#fff;}
+.header-sub{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+.live-clock{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);}
+.overall-bar{width:100px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.overall-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:3px;transition:width 0.6s cubic-bezier(.4,0,.2,1);}
+.overall-pct{font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);}
+.overall-progress{display:flex;align-items:center;gap:8px;}
+.editor-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);display:none;animation:pulse 2s infinite;cursor:pointer;}
+body:not(.view-mode) .editor-dot{display:block;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* MAIN */
+.main{max-width:1300px;margin:0 auto;padding:28px 20px;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:26px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:14px 16px;position:relative;overflow:hidden;cursor:pointer;transition:border-color 0.2s,transform 0.15s;}
+.stat-card:hover{transform:translateY(-1px);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cc,var(--amber));}
+.stat-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.15em;color:var(--text-dim);text-transform:uppercase;margin-bottom:6px;}
+.stat-count{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:#fff;line-height:1;}
+.stat-count span{font-size:12px;color:var(--text-dim);}
+.stat-bar{margin-top:8px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.stat-fill{height:100%;background:var(--cc,var(--amber));border-radius:2px;transition:width 0.6s cubic-bezier(.4,0,.2,1);opacity:0.85;}
+
+/* CONTROLS */
+.controls-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-btn{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:12px;letter-spacing:0.08em;padding:5px 14px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all 0.15s;text-transform:uppercase;}
+.filter-btn:hover,.filter-btn.active{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+.search-box{margin-left:auto;position:relative;}
+.search-box input{background:var(--bg2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:6px 12px 6px 30px;outline:none;width:200px;transition:border-color 0.15s;}
+.search-box input:focus{border-color:var(--amber);}
+.search-box input::placeholder{color:var(--text-dim);}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:12px;pointer-events:none;}
+.add-btn{display:flex;align-items:center;gap:7px;background:var(--amber);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.1em;padding:6px 16px;border:none;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:opacity 0.15s,transform 0.1s;}
+.add-btn:hover{opacity:0.9;transform:translateY(-1px);}
+
+/* CATEGORY */
+.category-group{margin-bottom:24px;}
+.cat-header{display:flex;align-items:center;gap:10px;padding:8px 0 7px;border-bottom:1px solid var(--border);margin-bottom:6px;}
+.cat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.cat-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.15em;text-transform:uppercase;}
+.cat-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-left:auto;}
+
+/* TASK CARD */
+.task-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:border-color 0.15s;animation:slideIn 0.22s ease;margin-bottom:3px;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+.task-card:hover{border-color:#2d3340;}
+.task-card.done{opacity:0.5;}
+.task-card.done .task-title{text-decoration:line-through;color:var(--text-dim);}
+.task-main{display:flex;align-items:flex-start;padding:11px 14px;cursor:default;}
+body:not(.view-mode) .task-main{cursor:pointer;}
+.task-checkbox{flex-shrink:0;width:18px;height:18px;border:2px solid var(--border);border-radius:3px;margin-right:12px;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.task-card.done .task-checkbox{background:var(--green);border-color:var(--green);}
+.task-checkbox svg{opacity:0;transform:scale(0.5);transition:all 0.15s;}
+.task-card.done .task-checkbox svg{opacity:1;transform:scale(1);}
+.task-body{flex:1;min-width:0;}
+.task-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.5;margin-bottom:3px;}
+.task-hint{font-size:11px;color:var(--text-dim);margin-top:2px;line-height:1.5;}
+.task-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:4px;}
+.task-cat-tag{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;border:1px solid;opacity:0.75;}
+.task-priority{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.05em;padding:2px 5px;border-radius:2px;text-transform:uppercase;}
+.prio-high{background:var(--red-dim);color:var(--red);border:1px solid var(--red);opacity:0.85;}
+.prio-med{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber);opacity:0.75;}
+.prio-low{background:var(--green-dim);color:var(--green);border:1px solid var(--green);opacity:0.75;}
+.alarm-type-tag{font-family:'Space Mono',monospace;font-size:9px;padding:2px 5px;border-radius:2px;text-transform:uppercase;}
+.mach-tag{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.12em;padding:2px 7px;border-radius:2px;text-transform:uppercase;}
+.mach-MIP{background:rgba(249,115,22,0.15);color:var(--orange);border:1px solid var(--orange);}
+.mach-BBS{background:rgba(59,130,246,0.15);color:var(--blue);border:1px solid var(--blue);}
+.mach-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.1em;padding:4px 10px;border-radius:3px;border:1px solid;background:transparent;cursor:pointer;transition:all 0.15s;text-transform:uppercase;}
+.mach-btn:hover{opacity:0.9;}
+.mach-btn.active-mach{filter:brightness(1.2);box-shadow:0 0 8px rgba(255,255,255,0.1);}
+.hw{background:var(--red-dim);color:var(--red);border:1px solid var(--red);}
+.sw{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue);}
+.hw-sw{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange);}
+.alarm-code-lbl{
+  font-family:'Space Mono',monospace;
+  font-size:9px;
+  font-weight:700;
+  color:var(--text-dim);
+  letter-spacing:0.12em;
+  margin-bottom:2px;
+  text-transform:uppercase;
+}
+.task-actions{display:flex;align-items:center;gap:3px;margin-left:10px;}
+.icon-btn{background:transparent;border:none;color:var(--text-dim);cursor:pointer;padding:4px;border-radius:3px;display:flex;align-items:center;justify-content:center;transition:color 0.15s,background 0.15s;}
+.icon-btn:hover{color:var(--amber);background:var(--amber-dim);}
+.icon-btn.del:hover{color:var(--red);background:var(--red-dim);}
+
+/* COMMENT PANEL */
+.comment-panel{border-top:1px solid var(--border);padding:10px 14px 12px 44px;display:none;background:var(--bg3);}
+.comment-panel.open{display:block;animation:slideIn 0.2s ease;}
+.comment-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:5px;}
+.comment-history{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;max-height:100px;overflow-y:auto;}
+.comment-entry{font-size:12px;color:var(--text-mid);line-height:1.5;display:flex;gap:8px;align-items:baseline;}
+.comment-ts{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);flex-shrink:0;}
+.comment-row{display:flex;gap:8px;}
+.comment-input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;padding:6px 10px;outline:none;transition:border-color 0.15s;resize:none;}
+.comment-input:focus{border-color:var(--amber);}
+.comment-input::placeholder{color:var(--text-dim);}
+.comment-save{background:var(--amber);color:#000;border:none;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.1em;padding:6px 12px;cursor:pointer;text-transform:uppercase;white-space:nowrap;}
+.comment-save:hover{opacity:0.85;}
+
+/* LOCK BUTTON — bottom right corner */
+.lock-btn{
+  position:fixed;bottom:20px;left:20px;
+  width:32px;height:32px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:50;
+  opacity:0.35;transition:opacity 0.2s,border-color 0.2s;
+  font-size:13px;
+}
+.lock-btn:hover{opacity:1;border-color:var(--amber);}
+/* When editor: show unlock style */
+body:not(.view-mode) .lock-btn{
+  background:var(--amber-dim);border-color:var(--amber);opacity:0.8;
+}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:26px;width:500px;max-width:95vw;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:mIn 0.2s ease;}
+@keyframes mIn{from{opacity:0;transform:scale(0.95) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:18px;color:#fff;}
+.form-row{margin-bottom:12px;}
+.form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:5px;}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;padding:8px 11px;outline:none;transition:border-color 0.15s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--amber);}
+.form-textarea{resize:vertical;min-height:55px;}
+.form-select option{background:var(--bg2);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end;}
+.btn-cancel{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:12px;letter-spacing:0.1em;padding:8px 18px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all 0.15s;}
+.btn-cancel:hover{border-color:var(--text-mid);color:var(--text);}
+.btn-submit{background:var(--amber);color:#000;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.1em;padding:8px 22px;border-radius:3px;cursor:pointer;text-transform:uppercase;}
+.btn-submit:hover{opacity:0.88;}
+
+.empty-state{text-align:center;padding:40px 0;color:var(--text-dim);font-size:13px;}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--green);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.1em;padding:9px 18px;border-radius:4px;z-index:999;transform:translateY(70px);opacity:0;transition:all 0.25s cubic-bezier(.4,0,.2,1);text-transform:uppercase;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr);}.header-sub,.live-clock,.overall-progress{display:none;}}
+</style>
+</head>
+<body class="view-mode">
+
+<!-- HIDDEN PIN POPUP -->
+<div class="pin-popup" id="pinPopup" onclick="pinPopupBg(event)">
+  <div class="pin-box">
+    <div class="pin-box-title">Access Required</div>
+    <input class="pin-input" id="pinField" type="password" placeholder="Enter access code" autocomplete="off"
+      onkeydown="if(event.key==='Enter') tryUnlock()"/>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-actions">
+      <button class="btn-nope" onclick="closePin()">Cancel</button>
+      <button class="btn-go" onclick="tryUnlock()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-badge" id="headerBadge">V0653</div>
+  <div>
+    <div class="header-title">COMMISSIONING TRACKER</div>
+    <div class="header-sub">COMECER INC · MIP-1100 & BBS</div>
+  </div>
+  <div class="header-right">
+    <div class="overall-progress">
+      <div class="overall-bar"><div class="overall-fill" id="overallFill" style="width:0%"></div></div>
+      <div class="overall-pct" id="overallPct">0%</div>
+    </div>
+    <div class="live-clock" id="clock"></div>
+    <div class="editor-dot" title="Editor mode — click to exit" onclick="lockEditor()"></div>
+  </div>
+</header>
+
+<div class="main">
+  <div class="stats-row">
+    <div class="stat-card" style="--cc:var(--red)"    onclick="filterCat('ALARMS')">
+      <div class="stat-label">🚨 HMI Alarms</div>
+      <div class="stat-count" id="stat-a">0 <span>/ 0</span></div>
+      <div class="stat-bar"><div class="stat-fill" id="fill-a" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card" style="--cc:var(--amber)"  onclick="filterCat('ELECTRICAL')">
+      <div class="stat-label">⚡ Electrical</div>
+      <div class="stat-count" id="stat-e">0 <span>/ 0</span></div>
+      <div class="stat-bar"><div class="stat-fill" id="fill-e" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card" style="--cc:var(--blue)"   onclick="filterCat('PROGRAMMING')">
+      <div class="stat-label">💻 Programming</div>
+      <div class="stat-count" id="stat-p">0 <span>/ 0</span></div>
+      <div class="stat-bar"><div class="stat-fill" id="fill-p" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card" style="--cc:var(--green)"  onclick="filterCat('MECHANICAL')">
+      <div class="stat-label">🔧 Mechanical</div>
+      <div class="stat-count" id="stat-m">0 <span>/ 0</span></div>
+      <div class="stat-bar"><div class="stat-fill" id="fill-m" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card" style="--cc:var(--purple)" onclick="filterCat('PLC')">
+      <div class="stat-label">🔲 PLC Program</div>
+      <div class="stat-count" id="stat-plc">0 <span>/ 0</span></div>
+      <div class="stat-bar"><div class="stat-fill" id="fill-plc" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card" style="--cc:var(--orange)" onclick="filterCat('DOCUMENTATION')">
+      <div class="stat-label">📋 Documentation</div>
+      <div class="stat-count" id="stat-doc">0 <span>/ 0</span></div>
+      <div class="stat-bar"><div class="stat-fill" id="fill-doc" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('pending',this)">Pending</button>
+    <button class="filter-btn" onclick="setFilter('done',this)">Done</button>
+    <span style="width:1px;height:20px;background:var(--border);margin:0 4px"></span>
+    <button class="mach-btn" id="machAll" onclick="setMachFilter(null)" style="border-color:var(--amber);color:var(--amber);background:var(--amber-dim)">ALL</button>
+    <button class="mach-btn" id="machMIP" onclick="setMachFilter('MIP')" style="border-color:var(--orange);color:var(--orange)">MIP</button>
+    <button class="mach-btn" id="machBBS" onclick="setMachFilter('BBS')" style="border-color:var(--blue);color:var(--blue)">BBS</button>
+    <button class="add-btn edit-only" onclick="openModal()">+ Add Task</button>
+    <button class="add-btn edit-only" onclick="generateDailyReport()" style="background:#10b981;border-color:#10b981">&#128202; Daily Report</button>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search tasks…" oninput="renderTasks()"/>
+    </div>
+  </div>
+
+  <div id="taskList"></div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalBg(event)">
+  <div class="modal">
+    <div class="modal-title">+ New Task</div>
+    <div class="form-row">
+      <label class="form-label">Task Description</label>
+      <textarea class="form-textarea" id="newTitle" placeholder="Describe the task…" rows="2"></textarea>
+    </div>
+    <div class="form-row-2">
+      <div>
+        <label class="form-label">Category</label>
+        <select class="form-select" id="newCat">
+          <option value="ALARMS">🚨 HMI Alarms</option>
+          <option value="ELECTRICAL">⚡ Electrical</option>
+          <option value="PROGRAMMING">💻 Programming</option>
+          <option value="MECHANICAL">🔧 Mechanical</option>
+          <option value="PLC">🔲 PLC Program</option>
+          <option value="DOCUMENTATION">📋 Documentation</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Priority</label>
+        <select class="form-select" id="newPrio">
+          <option value="high">🔴 High</option>
+          <option value="med">🟡 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Machine</label>
+        <select class="form-select" id="newMach">
+          <option value="MIP">MIP</option>
+          <option value="BBS">BBS</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Initial Note (optional)</label>
+      <input class="form-input" id="newNote" placeholder="Any initial notes…"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-submit" onclick="addTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- LOCK / UNLOCK BUTTON — subtle, bottom-left corner -->
+<div class="lock-btn" id="lockBtn" onclick="lockBtnClick()" title="Admin access"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────
+var PIN = '1802248';
+var LS_KEY = 'comecer-v0653-tasks-v144';
+
+// SYSTEM INFO — MIP-1100 Cardinal Florida
+// PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
+// PLC IP: 192.168.100.12 | HMI IP: 192.168.100.22
+// HMI: TP700 Comfort (SIMATIC HMI) | HMI SW: MIP_DUAL_V01
+// Project: V0653 | Serial: 2021130155
+
+var CAT_META = {
+  ALARMS:      {color:'var(--red)',    dim:'rgba(239,68,68,0.12)',   icon:'🚨', sid:'a'},
+  ELECTRICAL:  {color:'var(--amber)',  dim:'rgba(245,158,11,0.12)', icon:'⚡', sid:'e'},
+  PROGRAMMING: {color:'var(--blue)',   dim:'rgba(59,130,246,0.12)', icon:'💻', sid:'p'},
+  MECHANICAL:  {color:'var(--green)',  dim:'rgba(16,185,129,0.12)', icon:'🔧', sid:'m'},
+  PLC:         {color:'var(--purple)', dim:'rgba(168,85,247,0.12)', icon:'🔲', sid:'plc'},
+  DOCUMENTATION:{color:'var(--orange)', dim:'rgba(249,115,22,0.12)', icon:'📋', sid:'doc'},
+};
+
+// ─────────────────────────────────────────────────────────────
+// DEFAULT TASKS  (always available as baseline)
+// ─────────────────────────────────────────────────────────────
+function getDefaults() {
+  return [
+    // ── HMI ALARMS ──────────────────────────────────────────────
+    {id:'a01',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 23, 09:55 PM',comments:[{ts:'Mar 23, 09:55 PM',text:'Alarm cleared — VFD A1201 programmed (P1 done) and front door inverter now ready. No longer active on HMI.'}],
+     code:'A007',type:'hw-sw',
+     title:'FRONT DOOR INVERTER NOT READY',
+     hint:'VFD A1201 not powered/programmed or fault active. Program VFD, verify 480V supply and DI1/DI2 wiring.'},
+    {id:'a02',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 28, 08:00 PM',comments:[{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.18). A025 — ITD PORT INVERTER ALARM NOT READY. ITD VFD not commissioned yet — depends on plc16 ITD section programming.'},{ts:'Mar 28, 08:00 PM',text:'A025 no longer applicable — A1301 electric motor and VFD removed from ITD. ITD is now fully pneumatic (cylinders + solenoid valves). Inverter alarm has no valid context. Alarm can be suppressed or removed from HMI alarm list.'}],
+     code:'A025',type:'hw-sw',
+     title:'A025 — ITD PORT INVERTER ALARM NOT READY',
+     hint:'DONE / N/A. A1301 motor removed — ITD now pneumatic. Inverter alarm no longer applicable. Can be suppressed in HMI.'},
+    {id:'a03',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 23, 07:45 PM',comments:[{ts:'Mar 23, 07:45 PM',text:'Alarm cleared — SPD verified OK, no longer active on HMI.'}],
+     code:'A022',type:'hw',
+     title:'OVER VOLTAGE SURGE PROTECTOR ALARM',
+     hint:'Surge protection device (SPD) tripped or not installed — check, reset or replace.'},
+    {id:'a04',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 25, 03:00 PM',text:'Persistent alarm confirmed on HMI Mar 25.'},{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.69). A076 — ROOM COMMUNICATION ALARM. Investigate Profinet/Modbus network between chambers.'},{ts:'Mar 28, 08:30 PM',text:'RESOLVED via plc22 — FC91 Nw44 Optional_29 polarity fix. A076 cleared from HMI.'}],
+     code:'A076',type:'sw',
+     title:'A076 — ROOM COMMUNICATION ALARM',
+     hint:'DONE. Fixed via plc22 — FC91 Nw44 Optional_29 polarity mismatch. A076 cleared.'},
+    {id:'a05',cat:'ALARMS',prio:'high',done:false,comments:[{ts:'Mar 23, 07:45 PM',text:'Appeared cleared when LAF fans were off.'},{ts:'Mar 23, 10:30 PM',text:'Alarm returned after LAF fans powered on — was not actually resolved. LAF filter still clogged/missing. Reinstated as pending.'}],
+     code:'A077',type:'hw',
+     title:'RIGHT LAF FILTER CLOGGED',
+     hint:'LAF DP sensor indicating clogged HEPA. Install LAF filter first (mechanical task), then reset DP setpoint. Note: alarm only appears when LAF fans are running.'},
+    {id:'a06',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 23, 09:55 PM',comments:[{ts:'Mar 23, 08:45 PM',text:'Troubleshooting in progress — VFD A1201 now programmed (P1 done). Investigating door position sensors and interlock logic to clear A008.'},{ts:'Mar 23, 09:00 PM',text:'Root cause identified: anticrushing bar system not functioning.'},{ts:'Mar 23, 09:55 PM',text:'Fixed — Sliding Door Maintenance Check was not set in HMI SETUP Page 87. After enabling it, A008 cleared. Alarm no longer active.'}],
+     code:'A008',type:'hw',
+     title:'FRONT DOOR SECURITY OPEN POSITION ALARM',
+     hint:'DONE. Fix: enable Sliding Door Maintenance Check in HMI SETUP Page 87.'},
+    {id:'a07',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 23, 09:55 PM',comments:[{ts:'Mar 23, 09:55 PM',text:'Alarm cleared — main pressure alarm no longer active on HMI.'}],
+     code:'A002',type:'hw-sw',
+     title:'MAIN PRESSURE ALARM',
+     hint:'Main chamber pressure out of range — no air supply or sensor fault. Restore pneumatic panel power, check sensor wiring and setpoint.'},
+    {id:'a08',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 23, 07:45 PM',comments:[{ts:'Mar 23, 07:45 PM',text:'Alarm cleared — Geiger counter alarm no longer active on HMI.'}],
+     code:'A003',type:'hw-sw',
+     title:'RADIATION ALARM — GEIGER COUNTER',
+     hint:'Geiger detector cable and probe have physical damage — needs replacement. PLC/HMI connection configuration already corrected (done). Pending: replace cable and probe hardware.'},
+    {id:'a09',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 25, 02:00 PM',comments:[{ts:'Mar 25, 12:30 PM',text:'A9101 (SH9102 temperature/humidity sensor) in troubleshooting. Error in N9022 analog input module — signal not reaching PLC correctly.'},{ts:'Mar 25, 01:00 PM',text:'WIRING CORRECTED: was incorrectly wired — pin offset in N9022. Sensor A9101 now reading correctly.'},{ts:'Mar 25, 02:00 PM',text:'Temperature sensor ranges adjusted. Alarm A102 cleared.'}],
+     code:'A102',type:'hw',
+     title:'TEMPERATURE: STRUMENT OVER RANGE',
+     hint:'DONE. Wiring corrected (pin offset N9022) + ranges adjusted. Alarm cleared.'},
+    {id:'a10',cat:'ALARMS',prio:'med',done:false,comments:[{ts:'Mar 25, 12:30 PM',text:'Related to A102 — same root cause: A9101 sensor and N9022 analog input. Resolved together with A102.'},{ts:'Mar 25, 01:00 PM',text:'WIRING CORRECTED with A102. PENDING: adjust humidity sensor ranges in PLC/HMI to clear alarm A103.'}],
+     code:'A103',type:'hw',
+     title:'HUMIDITY: STRUMENT OVER RANGE',
+     hint:'Wiring corrected (pin offset in N9022). Missing: adjust humidity sensor ranges to clear alarm.'},
+    {id:'a11',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 25, 02:00 PM',comments:[{ts:'Mar 25, 02:00 PM',text:'LAF strument over range corrected. Alarm A104 cleared.'}],
+     code:'A104',type:'hw',
+     title:'LAF: STRUMENT OVER RANGE',
+     hint:'DONE. Alarm cleared.'},
+    {id:'e24',cat:'ELECTRICAL',prio:'med',done:true,doneAt:'Mar 25, 03:00 PM',comments:[{ts:'Mar 25, 02:30 PM',text:'Initially thought new sensor A9102 needed to be ordered.'},{ts:'Mar 25, 03:00 PM',text:'RESOLVED — new sensor not needed. Air velocity sensor A9102 already fixed. Must adjust with high-density holder. All analog sensors reading correctly. Missing during FAT: apply calibrated readings.'}],
+     title:'Air Velocity Sensor A9102 — adjust with high-density holder',
+     hint:'DONE. Sensor did not require replacement. Adjusted with high-density holder. All analog sensors reading. Pending FAT: calibrate readings.'},
+    {id:'a12',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 23, 07:45 PM',text:'Appeared cleared when LAF fans were off.'},{ts:'Mar 23, 10:30 PM',text:'Alarm returned after LAF fans powered on — was not actually resolved. DP sensor issue persists. Reinstated as pending.'},{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.101). A105 — Pressure Chamber: Measurement over range. Title corrected per HMI display text.'},{ts:'Mar 28, 08:30 PM',text:'Alarm still active on HMI but acknowledged — sensor range/setpoint adjustment pending. Marked done for commissioning tracking.'}],
+     code:'A105',type:'hw-sw',
+     title:'A105 — PRESSURE CHAMBER: MEASUREMENT OVER RANGE',
+     hint:'Pressure Chamber DP sensor measurement over range. Check sensor range configuration, tubing connections. Alarm appears when LAF fans are running.'},
+    {id:'a13',cat:'ALARMS',prio:'low',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.103). A107 — Temperature: Measurement under range. Title corrected per HMI display text — was previously listed as over range.'},{ts:'Mar 28, 08:30 PM',text:'Alarm active on HMI — sensor range/setpoint adjustment pending. Marked done for commissioning tracking.'}],
+     code:'A107',type:'sw',
+     title:'A107 — TEMPERATURE: MEASUREMENT UNDER RANGE',
+     hint:'Temperature sensor reading below configured HMI alarm range. Adjust alarm setpoint for site conditions.'},
+    {id:'a14',cat:'ALARMS',prio:'low',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.104). A108 — Humidity: Measurement over range. Confirmed per HMI display.'},{ts:'Mar 28, 08:30 PM',text:'Alarm active on HMI — sensor range/setpoint adjustment pending. Marked done for commissioning tracking.'}],
+     code:'A108',type:'sw',
+     title:'A108 — HUMIDITY: MEASUREMENT OVER RANGE',
+     hint:'Humidity sensor reading above configured HMI alarm range. Adjust alarm setpoint for local site conditions.'},
+    {id:'a15',cat:'ALARMS',prio:'low',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 23, 07:45 PM',text:'Appeared cleared when LAF fans were off.'},{ts:'Mar 23, 10:30 PM',text:'Alarm returned after LAF fans powered on — was not actually resolved. Reinstated as pending.'},{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.105). A109 — LAF: Measurement under range. Title corrected per HMI display — was previously listed as over range.'},{ts:'Mar 28, 08:30 PM',text:'Alarm active on HMI — LAF sensor range adjustment pending. Marked done for commissioning tracking.'}],
+     code:'A109',type:'sw',
+     title:'A109 — LAF: MEASUREMENT UNDER RANGE',
+     hint:'LAF airflow reading below configured HMI alarm range. Check VFD speed output, DP sensor tubing, and HMI setpoint. Alarm only appears when LAF fans are running.'},
+    {id:'a16',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 23, 09:55 PM',comments:[{ts:'Mar 23, 09:55 PM',text:'Warning cleared — W61 no longer active on HMI.'}],
+     code:'W61',type:'hw-sw',
+     title:'FAN STARTS NOT POSSIBLE — ENABLE NOT PRESENT',
+     hint:'Warning W61 — Fan enable signal missing. Verify fan enable DI from PLC, check relay output and VFD enable wiring.'},
+    {id:'a17',cat:'ALARMS',prio:'med',done:false,comments:[{ts:'Mar 23, 08:00 PM',text:'Gasket pressure sensor not present on this machine. Need to change PLC logic to manual inflate/deflate mode — bypass sensor interlock in software.'}],
+     code:'W01',type:'sw',
+     title:'FRONT DOOR GASKET INFLATE NOT POSSIBLE — PANEL NOT PRESENT',
+     hint:'Warning W01 — Gasket inflate blocked because pressure sensor panel is not present. Fix in PLC: change gasket control from automatic (sensor-based) to manual mode, bypassing the sensor interlock.'},
+    {id:'a18',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 23, 10:30 PM',text:'Warning W36 active on HMI — interlock bypass is engaged. Investigate which interlock is being bypassed and resolve root cause so bypass can be removed.'},{ts:'Mar 28, 08:30 PM',text:'W36 cleared — interlock bypass removed. No longer active on HMI.'}],
+     code:'W36',type:'sw',
+     title:'INTERLOCK BYPASS',
+     hint:'DONE. W36 interlock bypass cleared from HMI.'},
+    {id:'a19',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 28, 08:00 PM',comments:[{ts:'Mar 23, 11:55 PM',text:'New interlock to program: W28 Interlock_28 — ITD door must NOT open if ELD Prechamber door is not closed. Add this interlock condition in PLC logic (see plc3). Required for safe operation between ITD and prechamber.'},{ts:'Mar 28, 08:00 PM',text:'W28 interlock operational. ITD door open command blocked when ELD Prechamber door is not closed. Verified in FC90 interlock logic with real sensor inputs (E1.1 door closed, E1.0 gasket inflated). Part of plc20 JB replacement and plc3/plc16 ITD completion.'}],
+     code:'W28',type:'sw',
+     title:'INTERLOCK_28 — ITD DOOR DOES NOT OPEN IF ELD PRECHAMBER DOOR NOT CLOSED',
+     hint:'W28 safety interlock: Block ITD open command when ELD Prechamber door is not in closed position. Must be programmed in PLC as part of ITD pneumatic logic rewrite (plc3).'},
+    {id:'a20',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 24, 12:00 AM',comments:[{ts:'Mar 24, 12:00 AM',text:'Interlock programmed in PLC. W173: ELD Prechamber gasket cannot be deflated if ITD is not closed.'}],
+     code:'W173',type:'sw',
+     title:'INTERLOCK_173 — ELD PRECHAMBER CANNOT BE DEFLATED IF ITD NOT CLOSED',
+     hint:'DONE. Safety interlock W173 programmed: ELD Prechamber gasket deflate command blocked unless ITD door is confirmed closed.'},
+    {id:'a21',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 24, 12:00 AM',comments:[{ts:'Mar 24, 12:00 AM',text:'Interlock programmed in PLC. W174: ELD Prechamber gasket cannot be inflated if the door is not closed.'}],
+     code:'W174',type:'sw',
+     title:'INTERLOCK_174 — ELD PRECHAMBER CANNOT BE INFLATED IF DOOR NOT CLOSED',
+     hint:'DONE. Safety interlock W174 programmed: ELD Prechamber gasket inflate command blocked unless door is in closed position.'},
+    {id:'a22',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 24, 12:00 AM',comments:[{ts:'Mar 24, 12:00 AM',text:'Interlock programmed in PLC. W175: ITD gasket cannot be deflated if ELD Prechamber door gasket/seal is not inflated.'}],
+     code:'W175',type:'sw',
+     title:'INTERLOCK_175 — ITD CANNOT BE DEFLATED IF ELD PRECHAMBER SEAL NOT INFLATED',
+     hint:'DONE. Safety interlock W175 programmed: ITD gasket deflate command blocked unless ELD Prechamber door seal/gasket is confirmed inflated.'},
+    {id:'a23',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 24, 12:30 AM',comments:[{ts:'Mar 24, 12:30 AM',text:'Interlock programmed in PLC. W176: ELD Prechamber door gasket not deflated — client consent not present.'}],
+     code:'W176',type:'sw',
+     title:'INTERLOCK_176 — ELD PRECHAMBER DOOR GASKET NOT DEFLATED — CLIENT CONSENT NOT PRESENT',
+     hint:'DONE. Safety interlock W176 programmed in DB90/DB92: ELD Prechamber door gasket cannot be deflated without client consent.'},
+    {id:'a24',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 24, 12:30 AM',comments:[{ts:'Mar 24, 12:30 AM',text:'Interlock programmed in PLC. W177: Deflating ELD pre-chamber door gasket NOT possible — classification not correct.'}],
+     code:'W177',type:'sw',
+     title:'INTERLOCK_177 — DEFLATING ELD PRE-CHAMBER DOOR GASKET NOT POSSIBLE — CLASSIFICATION NOT CORRECT',
+     hint:'DONE. Safety interlock W177 programmed in DB90: ELD Prechamber door gasket deflation not possible — class/classification not correct.'},
+    {id:'a25',cat:'ALARMS',prio:'high',done:true,doneAt:'Mar 25, 01:00 AM',comments:[{ts:'Mar 25, 01:00 AM',text:'A078 alarm fully programmed in PLC and HMI. FC91_Allarmi Network 18: alarm logic uses %M63.0 (#A3.0 = ELD gasket inflate), %M63.1 (#A3.1 = ELD gasket deflate), %M51.0 (#E1.0 = ELD door closed sensor) with TON timer DB101.Timer_All_78 (T#5s delay). DB91_Allarmi_HMI: Allarme_78 at %DB91.DBX9.6. DB101_Timer_Allarmi: Timer_All_78 (IEC_TIMER) + Timer_All_78_Time = T#5s. FC91 reset logic: MOVE 16#0000 to DB91 words (DBW0-DBW9) triggered by DB70.Aux_Command_HMI.Aux_Command_18. HMI 10_PRECHAMBER screen: Vista_grafica_17 warning triangle on LATERAL DOOR with visibility = DB91_Allarmi_HMI_Allarme_78 (Range 1-1). Vista_grafica_1 visibility = DB92_Interlocks_HMI_Cumulativi_Interlock_173. Casella_di_testo_4 visibility = DB72_Optional_HMI_Optional_39. DB72_Optional_HMI: Optional_39 (Bool) = "Option - ELD Prechamber door" added for HMI SETUP screen ELD PRECAMERA button.'}],
+     code:'A078',type:'sw',
+     title:'A078 — ALARM INFLATE/DEFLATE ELD PRECHAMBER SEAL (FC91 + DB91 + DB101 + DB72 + HMI)',
+     hint:'DONE. Full alarm implementation: FC91 Network 18 ladder logic with TON 5s timer. DB91 Allarme_78 at offset 9.6. DB101 Timer_All_78. DB72 Optional_39 for HMI SETUP. HMI visibility animations on 10_PRECHAMBER screen. Reset via Aux_Command_18.'},
+    {id:'a26',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 26, 11:45 PM',text:'NEW alarm observed on HMI PRECHAMBER & ITD screen (Page 15): A305 — Pre-chamber pressure: Measurement over range. Alarm appeared after Pre-Chamber Exhaust Fan VFD A5151 was configured and running. Likely cause: Pre-Chamber differential pressure sensor reading out of range — may need sensor range adjustment or DP tubing verification.'},{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.106). A305 — Pre-chamber pressure: Measurement over range. Confirmed persistent. Investigate DP sensor and tubing.'},{ts:'Mar 28, 08:30 PM',text:'Alarm active on HMI — DP sensor/tubing adjustment pending. Marked done for commissioning tracking.'}],
+     code:'A305',type:'hw',
+     title:'A305 — PRE-CHAMBER PRESSURE: MEASUREMENT OVER RANGE',
+     hint:'DONE. Alarm acknowledged — DP sensor range adjustment pending. Appeared after A5151 VFD configured.'},
+
+    // ── ELECTRICAL ──────────────────────────────────────────────
+    {id:'e1',cat:'ELECTRICAL',prio:'high',done:true,
+     doneAt:'Mar 23, 05:00 PM',
+     comments:[{ts:'Mar 23, 05:00 PM',text:'480V POWER COMMISSIONING COMPLETE. MCCB Eaton NZMB1-A32-NA installed (32A, 3-pole, adjustable thermal). PO parts: PN1-XPA paralleling mechanism + NZM1/2-XV4 extension shaft + NZMB1-A32-NA breaker. MEASUREMENTS — MCCB inlet: L1-L2=480V, L2-L3=482V, L1-L3=474V (avg 477V). ABB disconnect OFF, upstream residual: GND-L1=2.92V, GND-L2=5.0V, GND-L3=6.34V, L1-L2=6V, L2-L3=6V, L1-L3=4V. MCCB ON, ABB input: GND-L1=274V, GND-L2=277V, GND-L3=274V, L1-L2=480V, L2-L3=480V, L1-L3=477V. ABB output leakage test (ABB OFF): GND-L1=0V, GND-L2=0V, GND-L3=0V, L1-L2=0V, L2-L3=0V, L1-L3=0V — NO LEAKAGE CONFIRMED. ABB ON final all components energized: GND-L1=247V, GND-L2=276V, GND-L3=274V, L1-L2=480V, L2-L3=480V, L1-L3=480V. All readings nominal. 480V power commissioning PASSED.'}],
+     title:'Connect 480V feed to front phase of disconnector (QF1201)',
+     hint:'MCCB: Eaton NZMB1-A32-NA (UL/CSA/IEC Slash Rated TM MCCB, 32A, 3-pole, adjustable thermal). ABB disconnect switch downstream. COMMISSIONING COMPLETE.'},
+    {id:'e2',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 28, 08:30 PM',text:'IO cards fault resolved. All PLC modules showing green/OK status.'}],
+     title:'Diagnose and fix multiple IO cards showing RED fault on PLC'},
+    {id:'e3',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 28, 08:30 PM',text:'Pneumatic panel power restored. Panel operational.'}],
+     title:'Restore power to pneumatic panel — currently no power present'},
+    {id:'e4',cat:'ELECTRICAL',prio:'high',done:false,comments:[],
+     title:'Geiger counter — replace cable between Geiger unit and probe (connector on probe end is damaged)',
+     hint:'Problem is at the probe connector — the cable between the Geiger counter and the probe needs to be replaced. The connector at the probe end is faulty/damaged. Replace the cable assembly and verify signal restores in HMI after reconnection.'},
+    {id:'e5',cat:'ELECTRICAL',prio:'low',done:true,
+     doneAt:'Mar 21, 01:00 PM',
+     comments:[{ts:'Mar 21, 01:00 PM',text:'Geiger connection configuration corrected in PLC/HMI. Communication established. Pending item: replace physical cable and probe (task E4).'}],
+     title:'Geiger counter — fix PLC/HMI connection configuration',
+     hint:'Configuration corrected. Marked done for record-keeping.'},
+    {id:'e6',cat:'ELECTRICAL',prio:'high',done:true,
+     doneAt:'Mar 21, 02:00 PM',
+     comments:[{ts:'Mar 21, 02:00 PM',text:'Dipswitches configured on both units. SPDT9041 main chamber and SPDT9042 prechamber done.'}],
+     title:'SPDT9041 (Main Chamber) & SPDT9042 (Pre-Chamber) — configure dipswitches',
+     hint:'Dipswitch configuration completed on both pressure differential transmitters. Main chamber and pre-chamber units done.'},
+    {id:'e7',cat:'ELECTRICAL',prio:'high',done:false,comments:[],
+     title:'SPDT9041 (Main Chamber) & SPDT9042 (Pre-Chamber) — verify live readings and values',
+     hint:'Dipswitches already configured. Now verify: check live readings on both units match expected process values. Confirm signal is reaching PLC AI card correctly. Compare HMI displayed value vs actual field reading. Document final values.'},
+    {id:'e8',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 27, 04:30 AM',comments:[
+      {ts:'Mar 21, 02:30 PM',text:'ROOT CAUSE FOUND: All cables on PLC card N9021 were installed swapped — port A connected to port B and vice versa. E2.5 affected along with all other channels on that card. Proceeding to rewire all A-to-B and B-to-A connections to correct positions.'},
+      {ts:'Mar 27, 04:30 AM',text:'DONE. N9021 rewiring completed. All A/B port cables swapped to correct positions. HMI Page 90 DI status confirmed — E2.x inputs now reading correctly. E2.5 safety relay signal verified.'}],
+     title:'N9021 PLC card — rewire all channels: port A/B swapped on installation, E2.5 and all channels affected',
+     hint:'DONE. All N9021 channels rewired A/B→correct. E2.x inputs verified on HMI DI status page. E2.5 safety relay OK.'},
+    {id:'e9',cat:'ELECTRICAL',prio:'med',done:true,doneAt:'Mar 23, 10:00 PM',comments:[
+      {ts:'Mar 21, 03:00 PM',text:'Pending — cannot verify until VFD A1201 is programmed and running. Check after task P1 is complete.'},
+      {ts:'Mar 23, 10:00 PM',text:'VFD A1201 programmed (P1 done). E2.0 Inverter Ready signal verified OK in PLC.'}],
+     title:'N9021 E2.0 — verify READY SHIELDED FRONT DOOR INVERTER input (pending VFD programming)',
+     hint:'DONE. E2.0 verified — inverter ready signal reads correctly after VFD A1201 programming.'},
+    {id:'e10',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 23, 10:00 PM',comments:[
+      {ts:'Mar 21, 03:00 PM',text:'Parts ordered overnight. Waiting for tracking number. Cannot proceed until parts arrive.'},
+      {ts:'Mar 23, 10:00 PM',text:'Anticrushing system replaced. E2.2 anticrushing front door input verified OK. E2.1 front door open safety switch also verified OK.'}],
+     title:'Replace anticrushing system — relay and sensors (parts on order, awaiting overnight delivery)',
+     hint:'SEQUENCE — must follow in order:\n1. Wait for parts (relay + sensors ordered overnight, tracking pending).\n2. Replace anticrushing relay and sensors.\n3. After replacement: REMOVE JUMPER bypassing the anticrushing circuit.\n4. Verify PLC input E2.2 (.2 DIA on N9021) = ANTICRUSHING FRONT DOOR reading correctly.\n5. Only after E2.2 verified OK → door safety system cleared.\n⚠️ Motor cables on VFD A1201 are DISCONNECTED until full door safety verified and VFD programmed. VFD can be programmed/emulated with motor disconnected.'},
+    {id:'e11',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 23, 10:00 PM',comments:[
+      {ts:'Mar 21, 03:15 PM',text:'Observed: E2.6 is always ON at rest and turns OFF when two-hand buttons SB1211/SB1212 are pressed. Schematic shows normally-open — should be OFF at rest and ON only when pressed. Logic is inverted.'},
+      {ts:'Mar 23, 10:00 PM',text:'E2.6 two-hand safety input logic corrected and verified OK.'}],
+     title:'E2.6 — fix inverted logic on FRONT DOOR TWO HANDS safety input (KS1211)',
+     hint:'PLC input E2.6 (.6 DIA on N9021) = COMANDO DUE MANI PORTA FRONTALE (two-hand safety relay KS1211, 3SK1211-1AB40). Current behavior: always ON, turns OFF when SB1211+SB1212 pressed. Expected per schematic: OFF at rest, ON only when both buttons pressed simultaneously.\nCheck two options:\n1. WIRING: Verify KS1211 output wired to correct NC/NO terminal — may be connected to NC contact instead of NO. Check terminals 13/14 (NO) vs 21/22 (NC) on KS1211.\n2. PLC LOGIC: If wiring is correct per schematic, invert the input bit in PLC program for E2.6.\nResolve before enabling door movement.'},
+    {id:'e12',cat:'ELECTRICAL',prio:'high',done:true,
+     doneAt:'Mar 21, 03:20 PM',
+     comments:[{ts:'Mar 21, 03:20 PM',text:'Root cause: power cable on E2.7 was connected to 24M00 (neutral/GND) instead of 24L00 (24V supply). Cable moved to correct 24L00 terminal. Fixed.'}],
+     title:'E2.7 — wrong power cable: 24L00 was wired to 24M00, corrected',
+     hint:'PLC input E2.7 (.7 DIA on N9021) had its 24V supply cable incorrectly landed on 24M00 (GND) instead of 24L00 (24VDC+). Cable has been moved to correct terminal. Verify E2.7 now reads correctly in PLC.'},
+
+    {id:'e13',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 7, 04:00 AM',comments:[{ts:'Apr 7, 04:00 AM',text:'DONE. All 3 gasket pressure sensors (SP9041, SP9161, SP9072) ground wiring corrected. Setpoints configured: HIGH=3.5 bar, LOW=2.5 bar. Verified in HMI.'}],
+     title:'SP9041, SP9161, SP9072 (gasket sensors) — rewire wrong ground wiring + configure setpoints Max 3.5 bar / Min 2.5 bar',
+     hint:'DONE. Ground wiring corrected on all 3 sensors. Setpoints: HIGH=3.5 bar, LOW=2.5 bar.'},
+    {id:'e14',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 7, 2026',
+     comments:[{ts:'Mar 23, 05:30 PM',text:'Finger-safe terminal covers ordered for Eaton NZMB1-A32-NA. Awaiting delivery. Required for 480V safety compliance before final energization sign-off.'},{ts:'Apr 7, 2026',text:'Finger-safe covers installed on MCCB Eaton NZMB1-A32-NA input and output terminals. 480V electrocution risk mitigated.'}],
+     title:'Install finger-safe covers (cubre dedos) on MCCB Eaton NZMB1-A32-NA input and output terminals — 480V electrocution risk mitigation',
+     hint:'DONE. IP20 finger-safe terminal covers installed on LINE and LOAD sides of MCCB QF1201. 480V safety compliance met.'},
+    {id:'e15',cat:'ELECTRICAL',prio:'high',done:true,
+     doneAt:'Mar 23, 06:30 PM',
+     comments:[{ts:'Mar 23, 06:00 PM',text:'Found during commissioning: plugs 1-4 all have hot/neutral reversed. Need to swap cables on all 4 receptacles.'},{ts:'Mar 23, 06:30 PM',text:'MIP receptacles 1-4 hot/neutral corrected and verified. Polarity confirmed OK on all 4 outlets. Per schematic page 166: XS1661, XS1662, XS1663, XS1664 via contactors KA9051-KA9054 and breakers QF1661-QF1664.'}],
+     title:'MIP Receptacles 1–4 (plugs): swap hot and neutral wires — reversed polarity',
+     hint:'DONE. All 4 MIP receptacle outlets corrected and verified. Per schematic page 166: XS1661-XS1664, KA9051-KA9054, QF1661-QF1664.'},
+
+    {id:'e16',cat:'ELECTRICAL',prio:'low',done:false,mach:'BBS',
+     comments:[{ts:'Mar 23, 06:30 PM',text:'~50 cables in BBS already routed to correct positions but missing identification labels. Quick identification task — cables are in place, just need labeling.'}],
+     title:'BBS: label ~50 unlabeled cables — wires already in correct positions, identification missing',
+     hint:'Approximately 50 cables in the BBS compartment are correctly routed but missing wire labels/tags. Identify each cable using schematics and apply labels. Fast task since cables are already in the right spots. Use ferrules or printed labels per site standard. After labeling, organize cables into wireways (task E17).'},
+    {id:'e17',cat:'ELECTRICAL',prio:'low',done:false,mach:'BBS',
+     comments:[{ts:'Mar 23, 06:30 PM',text:'After BBS cable labeling (E16), route labeled cables into wireways and dress for clean aesthetic finish. Quick task.'}],
+     title:'BBS: route cables into wireways and dress for clean finish — after labeling (E16)',
+     hint:'After E16 labeling is complete, organize all BBS cables into wireways. Bundle neatly, use cable ties/velcro straps, ensure clean aesthetic appearance. Does not take much time since cables are already in correct positions. Final cosmetic step before client inspection.'},
+    {id:'e18',cat:'ELECTRICAL',prio:'med',done:true,doneAt:'Apr 7, 2026',mach:'BBS',
+     comments:[{ts:'Mar 23, 06:30 PM',text:'Same issue as MIP (E15) — BBS receptacles also have hot/neutral reversed. Corrected but pending verification with outlet polarity tester.'},{ts:'Apr 7, 2026',text:'DONE. BBS receptacle polarity verified correct. Hot/neutral wires swapped and confirmed with polarity tester.'}],
+     title:'BBS Receptacles: swap hot and neutral wires — reversed polarity (same as E15, pending verification)',
+     hint:'BBS receptacle outlets have hot and neutral cables reversed — same issue found in MIP (E15 now fixed). Cables already corrected, pending final verification with outlet polarity tester. Reversed polarity is a shock hazard and NEC 406.4 code violation. Verify and confirm all BBS outlets read correct polarity before sign-off.'},
+    {id:'e19',cat:'ELECTRICAL',prio:'low',done:false,
+     comments:[{ts:'Mar 23, 06:30 PM',text:'MIP wireway cable dressing — same as E17 for BBS. Organize and dress cables for clean aesthetic finish.'}],
+     title:'MIP: route cables into wireways and dress for clean finish',
+     hint:'Organize all MIP cables into wireways. Bundle neatly, use cable ties/velcro straps, ensure clean aesthetic appearance. Same scope as E17 (BBS) but for the MIP side. Quick task — final cosmetic step before client inspection.'},
+
+    // ── PROGRAMMING ─────────────────────────────────────────────
+    {id:'p1',cat:'PROGRAMMING',prio:'high',done:true,doneAt:'Mar 23, 08:45 PM',comments:[{ts:'Mar 23, 08:45 PM',text:'VFD A1201 (ATV320U15N4C) programmed per A1201_DOOR_M1201.cfg Rev.03. Shielded front door VFD configured and operational.'}],
+     title:'Program VFD Door A1201 (ATV320U15N4C) — per A1201_DOOR_M1201.cfg Rev.03'},
+    {id:'p2',cat:'PROGRAMMING',prio:'med',done:true,doneAt:'Mar 25, 05:00 PM',comments:[{ts:'Mar 25, 05:00 PM',text:'VFD A1501 configured and programmed correctly. M1501 motor cables changed and connection corrected. Parameters: minimum speed 30Hz — pending verification. VFD executable program done. Main Chamber Exhaust fan running. PAW268 (N9022 analog output) verified OK.'}],
+     title:'Program VFD Exhaust Fan — Main Chamber',
+     hint:'DONE. VFD A1501 programmed. Motor M1501 cables corrected. Min speed 30Hz (to verify). Exhaust running.'},
+    {id:'p3',cat:'PROGRAMMING',prio:'med',done:true,doneAt:'Mar 25, 08:30 PM',comments:[{ts:'Mar 25, 08:30 PM',text:'3× LAF VFDs programmed and tested. LAF 1 (A1511), LAF 2 and LAF 3 — all running, fans operating correctly. PENDING: speed control with PID — will be done in detailed programming phase, not basic commissioning.'}],
+     title:'Program 3× VFD LAF — add PLC digital I/O and speed control interlocks',
+     hint:'DONE (VFD programming + test). 3 LAF VFDs programmed and tested OK. Missing: PID speed control — detailed programming later.'},
+    {id:'p4',cat:'PROGRAMMING',prio:'high',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Mar 23, 08:15 PM',text:'E3.2 Plexiglass Presence sensor not installed on this machine. Bypass interlock in PLC so front door gasket inflate can operate without plexiglass presence signal.'},{ts:'Apr 02, 10:30 PM',text:'HARDWARE: Make jumper on E3.2 PERMANENT. SQ9071/SQ9071W plexiglass presence sensor input. PLC bypass (FC40 Nw16 M81.2:=TRUE) already in place.'},{ts:'Apr 07, 2026',text:'DONE. E3.2 cable 90703 connected to 24L03 permanently. No plexiglass sensor in this application — input kept HIGH (24V) via 24L03 rail. PLC bypass (FC40 Nw16 M81.2:=TRUE) also in place for double protection. Hardware jumper is now permanent.'}],
+     title:'Bypass E3.2 Plexiglass Presence — cable 90703 to 24L03 + PLC bypass (FC40 Nw16)',
+     hint:'DONE. E3.2 cable 90703 connected to 24L03 (permanent). No plexiglass sensor in this application. PLC bypass M81.2:=TRUE also active.'},
+    {id:'p5',cat:'PROGRAMMING',prio:'med',done:true,doneAt:'Mar 25, 06:30 PM',comments:[{ts:'Mar 25, 03:00 PM',text:'Prechamber extraction fan motor already replaced (120 VAC — see e23).'},{ts:'Mar 25, 06:30 PM',text:'VFD Pre-Chamber Extraction Fan programmed and running. Exhaust physically tested — outputs OK, VFD running fan correctly. PENDING: PLC logic (triggers FC56, interlocks FC90, alarms FC91) and HMI screens — see plc17.'}],
+     title:'Program VFD Pre-Chamber Extraction Fan',
+     hint:'DONE. VFD programmed, exhaust running. Missing PLC logic and HMI (plc17).'},
+    {id:'p6',cat:'PROGRAMMING',prio:'med',done:false,comments:[{ts:'Mar 23, 11:15 PM',text:'Drawing System and Calibration screens not applicable to this machine configuration. Remove from HMI program to avoid confusion during operation.'},{ts:'Mar 27, 12:30 AM',text:'Confirmed: Drawing System screen must be removed from HMI navigation. This machine does not have the Drawing System option — screen should not be accessible to operators. Task scheduled for HMI programming phase (remote work during Mar 30 – Apr 5 or on-site after Apr 6). Open HMI project in TIA Portal WinCC, delete or hide the Drawing System screen and remove navigation button/link from main menu.'}],
+     title:'Remove Drawing System screen from HMI program — not applicable to this machine'},
+    {id:'p7',cat:'PROGRAMMING',prio:'med',done:false,comments:[{ts:'Mar 23, 11:15 PM',text:'Calibration screen not applicable to this machine. Remove from HMI program.'},{ts:'Mar 27, 12:30 AM',text:'Same as p6 — Calibration screen must be removed from HMI. Not applicable to this configuration. Remove screen and navigation button from HMI project.'}],
+     title:'Remove Calibration screen from HMI program — not applicable to this machine'},
+    {id:'p8',cat:'PROGRAMMING',prio:'med',done:true,doneAt:'Mar 28, 09:30 PM',comments:[{ts:'Mar 28, 09:30 PM',text:'HMI SETUP Page 86 — Current config (✓=ON, ✗=OFF): Solid Waste ✗ | ELD port ✓ | Pre-chamber ✓ | ITD port ✓ | Audit Trail ✗ | Check Location Teleclamp ✗ | Automatic Leak Test ✗ | Front Door Motorized ✓ | Front Door Manual ✗ | Rear Door Motorized ✗ | Rear Door Manual ✗ | Pre-chamber tray ✓ | LAF ✓ | Autoclave ✗ | ACS Delay Line ✗ | Temperature Probe and Humidity ✗ | Pull-out tray ✓ | Air In and OUT Valves ✗. HMI SETUP Page 87 — Current config: Photocells outside ITD Footprint ✗ | External Door Solid Waste ✗ | Crimping De-Crimping ✗ | Lower technical compartment ✓ | Electrical connection Filter clogging N.CLOSE | Shielded Door Pre-chamber ✓ | Ch. Slave LEFT [1] Ch. Slave RIGHT [0] | Door Open Bypass Front with Radiaz. ✗ | Discharge Clamp DWS ✓ | Check Maintenance Sliding Door ✓ | AVC BOX 1 ✗ | PLC pre-chamber Integrated ✓ | OVERVOLTAGE UNLOADER ✗ | ELD Prechamber ✓ | VPHP ✓ | VPHP LC Sensor ✗ | Particle Counter Pre-chamber ✗ | Particle Counter Main Bedroom ✗ | Temperature Probe and Pre-Chamber Hum ✓ | Geiger Pre-chamber ✗.'}],
+     title:'HMI SETUP configuration — Pages 86-87 documented (DB72 Optional flags)',
+     hint:'DONE. All HMI SETUP options documented as of Mar 28. Key enabled: ELD port, Pre-chamber, ITD port, Front Door Motorized, Pre-chamber tray, LAF, Pull-out tray, Shielded Door Pre-chamber, PLC pre-chamber Integrated, ELD Prechamber, VPHP, Temp Probe Pre-Chamber.'},
+
+    // ── MECHANICAL ──────────────────────────────────────────────
+    {id:'m1',cat:'MECHANICAL',prio:'high',done:false,comments:[],
+     title:'Connect inlet duct — Main Chamber and Pre-Chamber'},
+    {id:'m2',cat:'MECHANICAL',prio:'high',done:false,comments:[],
+     title:'Install couplings between inlet hose and manual valve at Main Chamber inlet'},
+    {id:'m3',cat:'MECHANICAL',prio:'med',done:false,comments:[],
+     title:'Install MIP up/down sensors — 3 door sensors (do after door is movable)'},
+    {id:'m4',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 25, 08:00 AM',comments:[{ts:'Mar 25, 08:00 AM',text:'Upstream and downstream fittings connected for filter integrity test. Tubing connected at front testing plate. Ready for HEPA filter integrity testing.'}],
+     title:'Connect downstream & upstream air fittings — 2 holes in plate + canister (tubing ready)',
+     hint:'DONE. Fittings connected upstream/downstream of integrity test filter and at front testing plate.'},
+    {id:'m5',cat:'MECHANICAL',prio:'med',done:false,comments:[],
+     title:'Adjust setpoints on door cylinder position sensors'},
+    {id:'m6',cat:'MECHANICAL',prio:'med',done:false,comments:[],
+     title:'Install Main Chamber interior: floor, cover, ceiling and lights'},
+    {id:'e27',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Mar 26, 09:30 PM',text:'E4.2 (N9023) has JUMPER installed — SP9123 (LAF Obstruction Second Filter differential pressure sensor) NOT present on equipment. Jumper allows LAF operation without sensor.'},{ts:'Apr 07, 2026',text:'DONE. E4.2 cable 91203 connected to 24L03 permanently. This application does NOT have LAF obstruction secondary filter — SP9123 sensor not applicable. Input kept HIGH (24V) via 24L03 rail. Documented as permanent bypass.'}],
+     title:'E4.2 — cable 91203 to 24L03 (no LAF obstruction secondary filter in this application)',
+     hint:'DONE. E4.2 cable 91203 to 24L03 permanent. No SP9123 sensor — not applicable to this config.'},
+    {id:'m7',cat:'MECHANICAL',prio:'high',done:false,comments:[],
+     title:'Install Main Chamber LAF HEPA filter'},
+    {id:'m8',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 23, 11:45 PM',comments:[{ts:'Mar 23, 11:45 PM',text:'Waste/drawing system cover installed.'}],
+     title:'Install solid waste / drawing system cover panel'},
+    {id:'m9',cat:'MECHANICAL',prio:'low',done:false,comments:[],
+     title:'Reinstall inlet filter cover'},
+    {id:'m10',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 23, 11:30 PM',mach:'BBS',comments:[{ts:'Mar 23, 11:30 PM',text:'Door cover installed on right technical space.'}],
+     title:'BBS: install cover on right technical space door'},
+    {id:'m20',cat:'MECHANICAL',prio:'med',done:false,mach:'BBS',comments:[{ts:'Mar 23, 11:30 PM',text:'Apply silicone caulk on BBS door cover to seal properly.'}],
+     title:'BBS: apply silicone caulk on door cover for sealing'},
+    {id:'m21',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 25, 10:00 AM',comments:[{ts:'Mar 25, 09:00 AM',text:'All pneumatic hoses need identification labels — solenoid valves, gasket inflate/deflate lines, rapid deflation, etc. Required for maintenance traceability and SAT/FAT documentation.'},{ts:'Mar 25, 10:00 AM',text:'Labels installed on all pneumatic hoses. Identification complete.'}],
+     title:'Label all pneumatic hoses — identification tags on all solenoid valve lines'},
+    {id:'m22',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Mar 25, 11:00 AM',comments:[{ts:'Mar 25, 10:30 AM',text:'Festo VUVG-L18-T32C-MZT-G14-1P3: valve not switching even though solenoid LED is on. Root cause: no pneumatic pilot air connected to port 12/14 (M5). Without pilot pressure (2-6 bar) valve cannot change state internally. ACTION: connect pilot air to port 12 or 14 (M5) with min. 2-6 bar.'},{ts:'Mar 25, 11:00 AM',text:'RESOLVED. Pilot air connected. Test performed: removed main air and power — ELD maintained 3 bar pressure on gasket. Valve holds pressure correctly without power. Verification OK.'}],
+     title:'Festo VUVG-L18 — connect pneumatic pilot air port 12/14 (M5) — valve not switching',
+     hint:'DONE. Pilot air connected. Retention test: with main air and power OFF, ELD gasket maintained 3 bar. Festo VUVG-L18-T32C-MZT-G14-1P3 valve operating correctly.'},
+    {id:'m23',cat:'MECHANICAL',prio:'high',done:false,comments:[{ts:'Mar 27, 01:00 AM',text:'A5151 Pre-Chamber Exhaust Fan: Phoenix PWM VFD control is now fully working — speed reference responds correctly from PLC/HMI (S2 DIP switch corrected, S1 verified OK, PAW270 analog output operational). HOWEVER, the fan currently installed is NOT the correct fan for this application. The original fan was installed incorrectly from the factory or during previous work — wrong model/type for the Pre-Chamber exhaust requirements. Fan must be mechanically replaced with the correct model matching the application specs. Coordinate with Comecer engineering to confirm correct fan model and source replacement. Electrical and software side (A5151 VFD, cables, PLC logic) are all functional — only mechanical fan swap is pending.'}],
+     title:'Pre-Chamber Exhaust Fan — replace incorrect fan with correct model for application (A5151)',
+     hint:'A5151 VFD PWM control WORKING. Wrong fan installed — not correct for this application. Replace fan mechanically. Coordinate with Comecer for correct model. Electrical/software functional.'},
+    {id:'m24',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 27, 08:00 AM',comments:[{ts:'Mar 27, 08:00 AM',text:'Installed flow restrictors (speed reducers) on ITD pneumatic cylinders to prevent the door from slamming. Door now opens and closes smoothly without hard impact. Mechanical adjustment complete — no PLC changes needed.'}],
+     title:'ITD door pneumatic cylinders — install flow restrictors to reduce door slam',
+     hint:'DONE. Flow restrictors installed on ITD cylinder ports. Door movement is now smooth and controlled — no hard impact on open/close.'},
+    {id:'m11',cat:'MECHANICAL',prio:'low',done:false,mach:'BBS',comments:[],
+     title:'BBS: clean and organize cables'},
+    {id:'m12',cat:'MECHANICAL',prio:'low',done:false,comments:[],
+     title:'MIP — clean cables in wireway'},
+    {id:'m13',cat:'MECHANICAL',prio:'low',done:false,comments:[],
+     title:'Apply silicone sealant (caulking)'},
+    {id:'m14',cat:'MECHANICAL',prio:'med',done:false,comments:[],
+     title:'Mount HMI panel on wall'},
+    {id:'m15',cat:'MECHANICAL',prio:'med',done:false,comments:[],
+     title:'Fabricate and install main gasket MIP'},
+    {id:'m16',cat:'MECHANICAL',prio:'high',done:false,comments:[],
+     title:'Review and adjust setpoint SP9032',
+     hint:'Verify SP9032 sensor setpoint matches process requirements — confirm correct value before first run.'},
+    {id:'m18',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 7, 04:00 AM',comments:[{ts:'Apr 7, 04:00 AM',text:'DONE. Duplicate of e13. Ground wiring corrected, setpoints configured.'}],
+     title:'SP9041, SP9161, SP9072 (gasket sensors) — rewire: wrong/ground wiring + configure setpoints Max 3.5 bar / Min 2.5 bar',
+     hint:'DONE. Duplicate of e13. See e13 for details.'},
+    {id:'m17',cat:'MECHANICAL',prio:'high',done:false,comments:[],
+     title:'Lateral door — fabricate and install metal target bracket for inductive sensor',
+     hint:'Sensor is mounted, cables are in place. The original metal bracket/target plate that the inductive sensor reads to detect DOOR CLOSED is missing — old one was removed/lost. Fabricate a new steel bracket and mount on door frame so sensor can detect closed position. Required for A008 door security interlock to clear.'},
+    {id:'m19',cat:'MECHANICAL',prio:'high',done:false,mach:'BBS',comments:[],
+     title:'BBS: check and seal lateral door compartment plug — required for pressure test, particle counter, SAT and FAT',
+     hint:'Verify the plug/cap on the BBS lateral door compartment is properly installed and sealed. Machine cannot pass pressure integrity test, particle counter test, SAT or FAT until this compartment is confirmed airtight. Inspect gasket condition on plug, confirm no leaks, and document result before scheduling SAT/FAT.'},
+
+    // ── PLC ─────────────────────────────────────────────────────
+    {id:'plc1',cat:'PLC',prio:'high',done:false,comments:[],
+     title:'Add VFD LAF I/O to PLC program — speed control, run feedback, fault with existing safety interlocks'},
+    {id:'plc2',cat:'PLC',prio:'high',done:false,comments:[],
+     title:'Full PLC program review — verify all I/O mapping, alarm codes and interlock logic'},
+    {id:'plc3',cat:'PLC',prio:'high',done:true,doneAt:'Mar 28, 08:00 PM',comments:[{ts:'Mar 23, 09:15 PM',text:'A1301 electric motor removed from schematic — ITD now pneumatic. PLC logic must be rewritten: remove motor drive logic (KM1301 brake, inverter ready E6.0), replace with solenoid valve open/close outputs for pneumatic cylinder. In progress.'},{ts:'Mar 23, 11:50 PM',text:'INTERLOCK NOTE: Prechamber ELD gasket CANNOT be deflated unless ITD is confirmed CLOSED and ITD gasket is INFLATED. This safety interlock must be programmed into the new PLC logic — if ITD is open or ITD gasket is not inflated, block ELD prechamber gasket deflate command (A3.1 YV9091B).'},{ts:'Mar 24, 12:10 AM',text:'PLC TAGS for STD reference (corrected): M190.0 (%M190.0) = P TRIGGER inflate lateral door seal pre-chamber. M190.1 (%M190.1) = P TRIGGER deflate lateral door seal pre-chamber. M190.2 (%M190.2) = TRIGGER inflate lateral door seal pre-chamber. M190.3 (%M190.3) = TRIGGER deflate lateral door seal pre-chamber. Tags in PLC tag table MIP_DUAL_LAF_V04_V18, rows 93-96. M190.0/M190.1 are P (pulse) triggers, M190.2/M190.3 are sustained triggers. Keep for STD documentation.'},{ts:'Mar 24, 12:35 AM',text:'MODIFIED PLC BLOCKS (not yet compiled/downloaded — not green in TIA Portal): FC52_Porte e Guarnizioni, FC56_Trigger, FC90_Interlock, FC91_Allarmi, DB90_Interlocks HMI, DB91_Allarmi_HMI, DB92_Interlocks HMI_Cumulativi, DB72_Optional_HMI, DB101_Timer_Allarmi. Total 9 blocks changed during this session for: ELD Prechamber interlocks (W173-W177), ITD pneumatic logic, trigger tags, A078 alarm (inflar/desinflar sello ELD), Optional_39 HMI SETUP, and timer configuration. Must compile and download to PLC before testing.'},{ts:'Mar 25, 09:15 AM',text:'FC52 Network 13 DOCUMENTED (ELD pre-chamber deflate and inflate door seal): INFLATE — M51.1 (#E1.1) → TON DB100.DBX880.0 Timer_Gonfia_Automatico_Guarnizione_ELD_precamara (T#2S). M190.2 + M51.1 → SET %M63.0 (#A3.0 gasket inflate). DB70.Aux_Command_28 → RESET #A3.1. DEFLATE — M190.3 + DB72.Optional_39 + M51.0 (#E1.0) + M51.1 (#E1.1) + M56.5 (#E6.5) + M53.7 (#E3.7) → RESET %M63.0 (#A3.0). DB70.Aux_Command_28 → SET %M63.1 (#A3.1 gasket deflate). Auto-deflate timer: TON DB100.DBX900.0 Timer_Sgonfiaggio_Automatico_Guarnizione_ELD (T#2S). Output chain: M63.1 + M51.1 → %M66.7 (#A6.7 = YV9174 rapid deflation) AND %M64.0 (#A4.0). FC56 Network 7 (PRE-CAMERA LATERAL SEAL ELD prechamber): M190.0 trigger with Aux_Command_70 → M190.2. M190.1 trigger → M190.3. Both with safety conditions M63.0, M63.1, M51.0. A4.0-A4.7 physically connected to SM 1223 DC/DC module (were missing before). NOTE: W175 interlock still pending — to be added when ITD section work begins.'},{ts:'Mar 28, 08:00 PM',text:'ITD DOOR COMPLETE. All pneumatic logic operational: A6.0 Door OPEN, A6.1 Door CLOSE, A6.2 Gasket INFLATE, A6.3 Gasket DEFLATE, A6.4 Safety Blocking Valve, A6.5 Quick Deflation, A6.7 Venturi Vacuum. Flow restrictors installed (m24). JB replacement done (plc20). A6.2 SET/RESET conflict fixed. A6.3 NO→NC for vacuum. All interlocks W26/W63/W173 cleared. ITD door opens/closes smoothly with pneumatic cylinders.'}],
+     title:'Change ITD door logic in PLC: remove A1301 electric motor — update to pneumatic cylinder control',
+     hint:'DONE. ITD now fully pneumatic. A6.0-A6.7 outputs operational. Solenoid valve logic replaces A1301 motor. Interlocks W26/W63/W173 cleared. Flow restrictors installed. JB replacement complete. A6.2 SET/RESET fixed. A6.3 NO→NC for vacuum.'},
+    {id:'plc4',cat:'PLC',prio:'high',done:true,doneAt:'Mar 28, 08:00 PM',comments:[{ts:'Mar 23, 09:15 PM',text:'HMI ITD door buttons must be updated to reflect pneumatic operation instead of electric motor. Remove inverter status indicators, add cylinder position feedback.'},{ts:'Mar 28, 08:00 PM',text:'ITD HMI buttons operational with pneumatic logic. Door open/close, gasket inflate/deflate all controllable from HMI. Inverter status indicators no longer applicable (A1301 removed). ITD door section complete.'}],
+     title:'Update HMI ITD door buttons: change from electric motor A1301 to pneumatic cylinder command',
+     hint:'DONE. HMI ITD door buttons now trigger pneumatic solenoid valve commands. A1301 inverter logic removed. Door open/close and gasket inflate/deflate operational from HMI.'},
+    {id:'plc15',cat:'PLC',prio:'high',done:true,doneAt:'Mar 25, 12:00 AM',comments:[{ts:'Mar 24, 12:20 AM',text:'Interlock_173 and Interlock_174 added to DB92_Interlocks_HMI_Cumulativi (rows 90-91). PLC tags: #E1.0 (%M51.0), #E1.1 (%M51.1).'},{ts:'Mar 25, 12:00 AM',text:'HMI ALARMS COMPLETED. W173-W177 added to HMI Discrete Alarms (Warning array) on TP700 Comfort. DB90 trigger addresses: W173=%DB90.DBX21.4, W174=%DB90.DBX21.5, W175=%DB90.DBX21.6, W176=%DB90.DBX21.7, W177=%DB90.DBX22.0. Alarm class: Errors. Access mode: Absolute 1s. DB92 only has Interlock_173 and Interlock_174 (cumulativi). PLC ladder logic in FC90_Interlock Network 25 (W175) and FC52 Network 7 (lateral seal) and Network 13 (inflate/deflate ELD). Note: Interlock_153 exists in DB90 offset 19.0 without comment — no HMI alarm needed.'}],
+     title:'Update HMI to display W173–W177 ELD Prechamber interlock warnings — DB90 + DB92',
+     hint:'DONE. All 5 interlocks (W173-W177) added to HMI Discrete Alarms. DB90: W173=%DB90.DBX21.4, W174=%DB90.DBX21.5, W175=%DB90.DBX21.6, W176=%DB90.DBX21.7, W177=%DB90.DBX22.0. DB92 (cumulativi): only Interlock_173 and Interlock_174. PLC logic: FC90 Network 25, FC52 Networks 7 and 13.'},
+    {id:'plc16',cat:'PLC',prio:'high',done:true,doneAt:'Mar 28, 08:00 PM',comments:[{ts:'Mar 25, 09:00 AM',text:'Same process as ELD Prechamber section: verify all ITD outputs, program alarms, interlocks, update FC52 (Porte e Guarnizioni), FC56 (Trigger), FC90 (Interlock), FC91 (Allarmi). W175 interlock still pending — must be added when ITD section work begins. ITD is pneumatic (A1301 motor removed). Coordinate with plc3, plc4, plc11, plc12.'},{ts:'Mar 28, 08:00 PM',text:'ITD section COMPLETE. All FC52 Nw6/Nw7 logic operational (door open/close, gasket inflate/deflate, quick deflation, venturi vacuum). FC90 interlocks W26/W63/W173 cleared. JB replacement (plc20) covers FC52, FC54, FC90, FC91, FC4, FC51 changes. A6.2 SET/RESET fixed. A6.3 NO→NC. Interlock reset range extended to bytes 0-21. All downloaded online and verified.'}],
+     title:'ITD section full PLC programming — outputs, alarms, interlocks (FC52, FC56, FC90, FC91) — same process as ELD',
+     hint:'DONE. ITD section complete: FC52 Nw6/Nw7 operational, FC90 interlocks cleared (W26/W63/W173), JB replacement done, A6.2 SET/RESET fixed, A6.3 NO→NC, reset range 0-21. All online.'},
+    {id:'plc17',cat:'PLC',prio:'high',done:false,comments:[{ts:'Mar 25, 04:00 PM',text:'PAW270 in N9022 Page 911 is wired (A5151W 2x0.5AWG22 Sh) but missing all logic. Motor already replaced with 120 VAC (e23). VN cable pending change (e22). A3.6 KA9097 contactor pending VN cable (e25).'},{ts:'Mar 25, 07:00 PM',text:'VFD Pre-Chamber already programmed and exhaust physically tested — running OK (p5 done). Now missing all PLC software logic: (1) FC56_Trigger — add triggers for Pre-Chamber Exhaust Fan (start/stop). (2) FC90_Interlock — add Pre-Chamber Exhaust safety interlocks (conditions to permit/block operation). (3) FC91_Allarmi — add Pre-Chamber Exhaust Fan alarms (VFD failure, overcurrent, etc.) in DB91. (4) FC54_Pre-Chamber or equivalent — speed control logic, PAW270 analog output. (5) HMI — add Pre-Chamber Exhaust speed control screen/buttons, status indicators, alarms. (6) Pending VN cables: e22 (FG0511/QF5151) and e25 (A3.6 KA9097).'},{ts:'Mar 26, 08:30 PM',text:'FC54_Pre-Chamber Network 3 (CONTROL FAN START AND STOP): DB70.DBX22.2 (Aux_Command_55_2) + %M54.6 (#E4.6 = tag 91204 Pre-Chamber Start/Stop Ventilation) → %M63.6 (#A3.6 = KA9097 Start Ventilation). E4.6 replaces signal 55101 from JB Prechamber which does not exist in this project. FC90_Interlock Network 21 (WARNING 22 — PRE-CHAMBER VENTILATION START/STOP): DB70.DBX22.2 (Aux_Command_55_2) + %M54.6 (#E4.6) → DB72.DBX0.2 (Optional_03) → DB90.DBX10.0 (Interlock_81) → (S) DB92.DBX2.5 (Interlock_22). Involved blocks: FC54, FC90, DB70, DB72, DB90, DB92.'},{ts:'Mar 26, 09:45 PM',text:'GLOBAL PLC CHANGE: All #E13.6 (%M82.6) references changed to #E4.7 (%M54.7 = N9023 E4.7 = tag 91205 Pre-Chamber Enable Doors Opening). E13.6 DID NOT EXIST as physical input — was phantom address from tag "Pre-chamber - Enable...". Now points to real input in N9023. Cross-reference confirms 4 locations in 2 blocks: FC54 (2 networks) + FC90 (2 networks). (1) FC54 Network 1 (CONTROL FRONT DOOR OPENING / AIRLOCK): %M54.7 (#E4.7) in rung with M151.6 + DB72.Optional_37 + %M81.0 (#E12.0) + %M66.2 (#A6.2) + DB904.DBX40.0 (HC Signal Exchange Flag01) → SR → %M71.0 (#A12.0) with TON timer DB100.DBX540.0 (Timer_Sblocco_Porta_Schermata_Precamera), timer.Q in DB100.DBX552.2 → R1. (2) FC54 Network 2 (INFLATE / DEFLATE FRONT SEAL): %M54.7 (#E4.7) in rung with M151.5 + M81.1 (#E12.1) + M81.0 (#E12.0) + DB72.Optional_37 + DB904 Flag01 + %M66.2 (#A6.2) → %M71.2 (#A12.2) (S) and %M71.3 (#A12.3) (R), branch DB70.Aux_Command_28. (3) FC90 Network 19 (W20 — Pre-Chamber Front Door): Interlock_74 %M54.7 (#E4.7) → DB90.DBX9.1 → (S) DB92.DBX2.3 (Interlock_20). (4) FC90 Network 20 (W21): Interlock_79 %M54.7 (#E4.7) → DB90.DBX9.6 → (S) DB92.DBX2.4 (Interlock_21). Modified blocks: FC54, FC90.'},{ts:'Mar 26, 11:45 PM',text:'A5151 Pre-Chamber Exhaust VFD (ATV320): Fan runs but speed reference from PLC analog output PAW270 was NOT changing fan speed. Root cause: DIP switch S2 on ATV320 was NOT configured for terminal/analog speed reference — VFD was ignoring analog input on UI terminal (cable 51502 AWG18 BU from N9022 PAW270). S2 corrected → speed reference now responds to PLC/HMI command. HMI PRECHAMBER & ITD screen (Page 15) shows READ OUT FAN EXTRACTION = 20% and READ OUT PRESSURE EQUALIZATION = 20%. PID ADJUSTMENT EXTRACTION shows red X — PID block not yet configured for extraction fan. Ref schematic Page 515 (Pre-Chamber Air Extraction Fan). S1 verified OK (0-10V). Active alarms on HMI: A305 (Pre-chamber pressure: Measurement over range) — NEW alarm not previously seen, A076 (Room Communication Alarm), A025 (ITD Port Inverter Not Ready). NEXT: configure PID for extraction fan speed control, program FC56 triggers, FC91 alarms.'},{ts:'Mar 27, 01:00 AM',text:'A5151 Phoenix PWM control with Pre-Chamber Exhaust motor NOW WORKING — speed reference responds correctly from PLC/HMI via PAW270 analog output. VFD S2 DIP switch fix + S1 verified = full analog control operational. MECHANICAL ISSUE REMAINING: the fan currently installed is NOT the correct fan for this application (wrong fan was installed originally). Fan must be mechanically replaced with the correct model. See m23 for mechanical fan replacement task. Software/electrical side is functional — only mechanical fan swap pending.'}],
+     title:'Pre-Chamber Exhaust Fan — program FC56 triggers + FC90 interlocks + FC91 alarms + HMI',
+     hint:'A5151 PWM WORKING — speed reference operational from PLC/HMI. Fan runs but WRONG FAN installed (see m23 for replacement). MISSING: FC56 triggers, FC91 alarms, FC54 speed control PAW270, HMI PID config, HMI screens. Pending VN cables (e22, e25). TODO: Review PAW270 1M PAW270 1 configuration on-site.'},
+    {id:'plc18',cat:'PLC',prio:'high',done:false,comments:[{ts:'Mar 25, 06:30 PM',text:'KA9055A/B (80ATS contactor) physically removed from A0.4 in N9020 (Page 905) and relocated to A4.1 in N9023 (Page 913). Cable 91302 AWG18 BU connected to A4.1 DQa → KA9055B → A9055A (80ATS) → YV9131W. In PLC software output still mapped to %Q of N9020 A0.4. Change PLC program assignment from A0.4 (N9020) to A4.1 (N9023).'},{ts:'Mar 25, 07:30 PM',text:'FC54_Pre-Chamber Network 6 (CONTROL - VENTILATION START/STOP) UPDATED: Rung 1: DB70.DBX1.0 (Aux_Command_09) + %M57.1 (#E7.1) + %M57.3 (#E7.3) + %M53.6 (#E3.6) → SET %M64.1 (#A4.1). Branch: DB72.DBX2.1 (Optional_18). TON timer %DB100.DBX920.0 (Timer_Enable_FansVentilation) with DB70.Aux_Command_28 trigger, timer value %DB100.DBD936 (Timer_Enable_FansVentilation_Timer T#5s). Rung 2: DB100.DBX932.2 (Timer_Enable_FansVentilation.Q) → %M60.4 (#A0.4). Main output now in #A4.1 (N9023), timer output maintains #A0.4. DB100_Timer also modified (add to blocks list).'}],
+     title:'PLC software: reassign KA9055A/B from A0.4 (N9020) to A4.1 (N9023) — 80ATS relocated',
+     hint:'DONE in software. FC54 Network 6: Rung1 → %M64.1 (#A4.1). Timer DB100.DBX920.0/DBD936 (T#5s). Rung2 timer.Q → %M60.4 (#A0.4). DB100 modified.'},
+    {id:'plc19',cat:'PLC',prio:'high',done:false,comments:[{ts:'Mar 27, 12:00 AM',text:'LAF VFD speed issue: 100% HMI command = 34.1 Hz instead of 50 Hz on Invertek E3-1PH drives. After verifying FC2 InOut Network 4 scaling formula is CORRECT (REAL_TO_UINT(ObjPid.ID[x].Output * 27648.0 / 100.0) = 27648 = 10V at 100%), the issue is now suspected to be VFD parameter misprogramming — NOT PLC software. Check on all 3 VFDs (A1511 LAF 1, A1512 LAF 2, A1513 LAF 3): (1) P-01 Maximum Frequency — should be 50.0 Hz (may be set lower). (2) P-02 Minimum Frequency. (3) P-07 or P-35 Analog Input scaling — verify 0-10V = 0-50 Hz full range. (4) If P-01 is already 50 Hz, then check if analog input high reference is capped (e.g., P-35 Analog Input Max Freq might be 34.1 Hz). Use OptiTools or VFD keypad to read/modify. If VFD params are correct, THEN investigate PLC side: monitor ObjPid.ID[4].Output at HMI 100% to see actual value reaching FC2. CRITICAL not urgent — LAFs run at reduced speed.'},{ts:'Mar 27, 01:30 AM',text:'OptiTools Studio parameters READ from all 4 drives via OptiStick Smart (Bluetooth LE). Drive FW V3.12. Drives connected: 01=A1501, 02=A1512 LAF 2, 03=A1513 LAF 3, 04=A1511 LAF 1. LAF motor nameplate: ebm D2E146-AP47-02, 230V~50/60Hz, 1.31/1.45A, 300/330W, 2050/2550rpm, 8µF 400VDB, Iso-B, Made in Germany (09/02). BASIC PARAMETERS (same on all LAF drives): P-01=2050rpm (Max Speed = 50Hz — CORRECT), P-02=1435rpm (Min Speed = ~35Hz), P-03=15s (Accel Ramp), P-04=15s (Decel Ramp), P-05=2 Ramp to Stop (Fast Stop), P-07=230V, P-08=1.7A (NOTE: nameplate says 1.31A@50Hz — should correct to 1.31A), P-09=50Hz (Motor Rated Freq — CORRECT), P-10=2050rpm (Motor Rated Speed — CORRECT), P-11=3% (Boost Start), P-12=0 Terminal Mode, P-14=101 (Extended Access). ANALYSIS: P-01=2050rpm=50Hz is CORRECT. VFD Basic params are NOT the cause. At HMI 100%, VFD shows ~41 Hz (not 50 Hz). 41/50 = 82% → VFD only receiving ~8.2V instead of 10V. ROOT CAUSE LIKELY IN PLC: ObjPid.ID[4].Output is capped at ~82% — HMI displays setpoint (100%) but actual PID output is limited. DEBUG STEPS: (1) Check Extended tab in OptiTools for P-36/P-37 AI scaling params — verify AI1 High Reference = P-01. (2) Measure voltage at VFD AI terminals (UI/GND on N9032) with multimeter at HMI 100%. (3) If voltage ~8.2V → PLC issue: check ObjPid.ID[4] Output High Limit in DB — change to 100.0. (4) If voltage = 10V → VFD Extended param issue. ALSO: P-08 should be corrected from 1.7A to 1.31A per motor nameplate.'},{ts:'Mar 27, 02:00 AM',text:'MULTIMETER TEST RESULT: Measured at N9032 AO terminals (channels 6 and 7). At HMI 0% → 0V. At HMI 100% → 9.96 VDC. PLC analog output is CORRECT — full 10V reaching the VFD. ROOT CAUSE CONFIRMED: VFD Extended parameters are limiting the analog input range. PLC and ObjPid are NOT the issue. FIX: Open OptiTools Extended tab and check: (1) P-15 AI1 Configuration — must be 0: 0-10V. (2) P-36 AI1 Minimum Reference — should be 0 rpm. (3) P-37 AI1 Maximum Reference — should be 2050 rpm (= P-01). If P-37 is set lower than 2050, that is the cause — 10V maps to a speed lower than max. Set P-37 = 2050 rpm on all 3 LAF drives and retest.'},{ts:'Mar 27, 02:30 AM',text:'SECOND MULTIMETER TEST — DEFINITIVE: At VFD analog input terminals with HMI at 100%, multimeter reads 9.97 VDC. VFD display shows 34.1 Hz. This PROVES: (1) PLC analog output is 100% correct — 9.97V ≈ 10V full scale. (2) VFD is mapping 10V → 34.1 Hz instead of 50 Hz. (3) 34.1/50 = 68.2% — the VFD Extended parameter P-37 (AI1 Maximum Reference) is set to approximately 1398 rpm instead of 2050 rpm. FIX REQUIRED: In OptiTools Extended tab → P-37 AI1 Maximum Reference = 2050 rpm, P-36 AI1 Minimum Reference = 0 rpm. Apply to all 3 LAF drives (A1511, A1512, A1513). Write to drives and verify 10V = 50 Hz on VFD display.'},{ts:'Mar 27, 03:00 AM',text:'ROOT CAUSE FOUND AND RESOLVED. Extended params (P-16=0-10V, P-35=100%, P-39=0%) were all correct — P-36 is Drive Address and P-37 is Extended Menu Access Code (NOT AI scaling as initially suspected). ACTUAL ROOT CAUSE: Invertek E3-1PH RPM mode conversion. When P-10 (Motor Rated Speed) has a value (e.g., 2050 rpm), the VFD operates in RPM mode and converts RPM→Hz using internal pole calculation: f = N × P / 120. With P-10=2050rpm, VFD derives 2-pole motor (nearest sync speed above 2050 = 3000rpm), so f = 2050×2/120 = 34.17 Hz — exactly matching the 34.1 Hz on display. The ebm D2E146-AP47-02 is an EXTERNAL ROTOR motor with non-standard pole/speed characteristics — the standard induction motor pole formula does NOT apply. FIX: Set P-10 = 0 rpm → VFD switches to Hz mode. P-01 then displays in Hz (not RPM). VERIFIED: with P-10=0, P-01=50.0Hz → VFD correctly outputs 50 Hz at 10V input (HMI 100%). FINAL PARAMETERS for all 3 LAF drives (A1511, A1512, A1513): P-01=50.0Hz, P-02=0.0Hz, P-09=50Hz, P-10=0rpm (Hz mode), P-08=1.31A (per D2E146 nameplate @50Hz). PLC output confirmed correct: 0%=0V, 100%=9.97V. Issue RESOLVED.'},{ts:'Mar 27, 03:30 AM',text:'FINAL CONFIGURATION APPLIED to all 3 LAF drives. P-02 set to 35.0 Hz (minimum frequency for LAF operation — matches original Comecer intent of 1435rpm = 70% of max, protects motor from low-speed overheating and maintains laminar airflow minimum). FINAL PARAMS WRITTEN: P-01=50.0Hz (max), P-02=35.0Hz (min — 70% of max, LAF laminar flow minimum), P-08=1.31A (motor nameplate D2E146 @50Hz), P-09=50Hz, P-10=0rpm (Hz mode). All 3 drives (A1511 LAF 1, A1512 LAF 2, A1513 LAF 3) updated via OptiTools Studio + OptiStick Smart Bluetooth. VFD parameter document updated to reflect new Hz mode values.'}],
+     title:'LAF VFD speed limit — RESOLVED: E3-1PH RPM→Hz conversion issue, switched to Hz mode',
+     done:true,doneAt:'Mar 27, 03:30 AM',
+     hint:'DONE. Root cause: VFD RPM mode (P-10≠0) uses pole formula f=N×2/120=34.1Hz. Fix: P-10=0 (Hz mode). Final: P-01=50Hz, P-02=35Hz (LAF min), P-08=1.31A, P-09=50Hz. 10V=50Hz confirmed. Applied to all 3 LAF drives.'},
+    {id:'plc20',cat:'PLC',prio:'high',done:false,comments:[{ts:'Mar 27, 09:00 AM',text:'E12.4 (#M81.4) and E12.5 (#M81.5) were from a JB (Junction Box) that does NOT exist in this project. Original design used two sensors to detect tray position left/right, but this machine only has ONE sensor on E6.6 for tray home position. Replaced E12.4/E12.5 with E6.6 across multiple FCs. CHANGES DONE: (1) FC52 Nw6 Flag04 HC R→L: E12.4+E12.5 REPLACED by E6.6. (2) FC52 Nw6 Flag01 HC L→R: E12.4+E12.5 REPLACED by E6.6. (3) FC54 Nw7 Aux_HMI_38: E6.6 added IN PARALLEL (E12.4/E12.5 kept temporarily). (4) FC90 Nw8 Interlock W26 (tray not in position): E6.6 added — W26 NOW CLEARED. REMAINING: FC91 Nw40 A049 alarm still references E12.4/E12.5 — needs update to E6.6. Also ChamberCommunication may reference E12.4. W63 interlock still active — ITD door vs prechamber door closed condition.'},{ts:'Mar 27, 09:30 AM',text:'W63 fix in FC90 Nw8: Added real inputs in parallel to non-existent JB signals. (5) E12.1 (#M81.1) → added E1.1 (#M51.1) in parallel — door closed signal from real sensor. (6) E13.0 (#M82.0) → added E1.0 (#M51.0) in parallel — gasket inflated pressure sensor (real signal). Both E1.0 and E1.1 are real inputs on the existing I/O module. E12.1/E13.0 from non-existent JB kept in parallel for now.'},{ts:'Mar 27, 09:45 AM',text:'(7) FC90 Nw8 Flag01 (HC LEFT→HC RIGHT): Added E1.1 (#M51.1, door closed) AND E1.0 (#M51.0, gasket inflated) as conditions on the Flag01 rung. Ensures HC handshake LEFT→RIGHT only happens when door is confirmed closed AND gasket is inflated — using real pressure sensor signals. Both conditions required before tray can move from left to right hot cell.'},{ts:'Mar 27, 10:30 AM',text:'Continued cross-reference sweep of E12.1 across all FCs. Additional changes: (8) FC52 Nw6 — Flag03/A6.0 output rung: E1.1 in parallel with E12.1, E1.0 in parallel with E13.0. (9) FC52 Nw6 — HC handshake rungs (Flag01/Flag06): E1.1 in parallel with E12.1, E1.0 in parallel with E13.0. (10) FC52 gasket ITD section — Flag06/SET-RESET rung: E1.1 added in parallel with E12.1 in the Optional_24+Optional_29 condition branch. (11) FC54 Nw2 INFLAR/DESINFLAR EL SELLADO FRONTAL — deflate/inflate rung: E1.1 added in parallel with E12.1 in the M151.5 condition path (RESET A12.2 / SET A12.3). (12) ChamberCommunication02 FC4 — Flag01/Flag03 rung: E1.1+E1.0 added in parallel with E12.1+E13.0. (13) FC51 Main Cycle Nw9 CONSENTIMIENTO: E1.1 added in parallel with E12.1. Cross-reference sweep of E12.1 now covers: FC4 ✓, FC51 ✓, FC52 Nw6 ✓ (x5), FC52 Nw7 ✓, FC54 Nw2 ✓. Remaining from cross-ref: FC54 Nw5, FC54 Nw6 (x2), FC90 Nw20, FC90 Nw22.'},{ts:'Mar 28, 10:00 AM',text:'(14) FC54 Nw5 CONSENSO PUERTAS PREVIAS A LA CÁMARA CERRADAS: E1.0+E1.1 added in parallel with E12.1+E12.2+E13.0 rung → A13.1. Door consensus for pre-chamber now evaluates with real sensors. (15) FC54 Nw6 DESCARGA BANDEJA — upper rung (M152.0 path): E1.1 in parallel with E12.1. Controls SET A12.6/RESET A12.4/SET A12.5 with A076 alarm check. (16) FC54 Nw6 DESCARGA BANDEJA — lower rung (M152.1 path): E1.1 in parallel with E12.1. Controls SET A12.7/SET A12.5/RESET A12.6. Remaining: FC90 Nw20, FC90 Nw22, FC91 Nw40.'},{ts:'Mar 28, 11:00 AM',text:'(17) FC90 Nw20 ADVERTENCIA 21 INFLAR/DESINFLAR SELLO FRONTAL PRE-CÁMARA: E1.1 in parallel with E12.1 in Interlock_77 rung. (18) FC90 Nw1 ADVERTENCIAS DE REINICIO — interlock reset range fix: Added MOVEs 16#0000 to DB90.DBW10 thru DBW20 (6 new) AND DB92.DBW10 thru DBW20 (6 new, includes Interlock_W01-W05). Original reset only covered bytes 0-9 in both DBs. Interlock_173 at DB92.DBX11.0 and Interlock_176 at DB90.DBX21.7 were never being reset. Now full range DB90 bytes 0-21 and DB92 bytes 0-21 are cleared on HMI reset command (Aux_Command_19). Verified on HMI: W173 now clears correctly. Remaining cross-ref: FC90 Nw22, FC91 Nw40.'},{ts:'Mar 28, 12:30 PM',text:'NEW ISSUE FOUND: In FC54 Nw2 (INFLAR/DESINFLAR EL SELLADO FRONTAL), the output A12.2 (M71.2) needs to be changed to the lateral door prechamber output instead. Search for #A6.2 shows it is used in FC54 Nw2(x2), FC52 Nw7(x2), FC91 Nw24(x2), FC90 Nw20, FC90 Nw19. Pending: determine correct output address for lateral door prechamber and apply change.'},{ts:'Mar 28, 01:00 PM',text:'(19) FC52 Nw6 A6.2 SET/RESET conflict fix: The rung with M160.1+E0.2+M165.0+E3.7 was RESETting A6.2 (gasket inflate) at the same time the timer was SETting it. Root cause: no second chamber PLC connected, so handshake conditions had no valid context. Fix: Added OR with NC condition to disable the RESET rung (practically bypassed without deleting code — can be re-enabled when second PLC is connected). Also changed A6.3 from NO to NC in Nw7 for vacuum system operation. (20) Downloaded all changes to PLC online. Verified FC52 Nw6 online: all E1.1/E1.0 parallel paths active (green), E6.6 active, Flag01/Flag03/Flag04/Flag06 handshake signals all functional with real sensors. REMAINING: FC90 Nw22, FC91 Nw40.'}],
+     title:'Replace non-existent JB inputs (E12.x/E13.x) with real sensors — FC52, FC54, FC90, FC91',
+     done:true,doneAt:'Mar 28, 08:00 PM',
+     hint:'DONE. JB not installed. E12.4+E12.5→E6.6, E12.1→E1.1, E13.0→E1.0. ALL BLOCKS UPDATED: FC4, FC51, FC52(Nw6x5,Nw7), FC54(Nw2,Nw5,Nw6x2), FC90(Nw1,Nw8,Nw20), ChamberComm. Reset range DB90/DB92 0-21. A6.2 SET/RESET fixed. A6.3 NO→NC. W26/W63/W173 cleared. Minor remaining: FC90 Nw22, FC91 Nw40.'},
+    {id:'plc21',cat:'PLC',prio:'medium',done:false,comments:[{ts:'Mar 28, 02:00 PM',text:'Vacuum system venturi valve auto-shutoff needed. When gaskets are open (deflated), outputs A6.5 (Quick Deflation YV9173) and A6.7 (Rapid Deflation Vacuum YV9174) remain ON indefinitely — venturi valve keeps running. This causes continuous venturi valve noise and a slight pressure drop in the system (minimal impact but not ideal). FIX: Add TON timer in FC52 Nw7 to auto-disable A6.5 and A6.7 after a configurable time (e.g., T#10s–T#30s) once gasket deflation is complete. Timer should start when gaskets reach fully deflated state (no pressure on E1.0) and reset when gasket inflate cycle begins. Timer value stored in DB100 for HMI adjustment. Low priority — system functional without it.'}],
+     title:'Vacuum system venturi valve auto-shutoff timer — FC52 Nw7, A6.5/A6.7 TON timer',
+     hint:'A6.5 (Quick Deflation) and A6.7 (Venturi Vacuum) stay ON when gaskets are open — venturi valve runs continuously causing noise and slight pressure drop. Add TON timer in FC52 Nw7 to auto-disable after X seconds. Timer in DB100 for HMI config.'},
+    {id:'plc22',cat:'PLC',prio:'high',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 28, 02:30 PM',text:'A076 ROOM COMMUNICATION ALARM root cause analysis: FC91 Nw44 monitors two WatchDog values in DB904 (HC Signal Exchange). Rung 1: Optional_03+Optional_29(NO) checks DB904.DBW0 (HC RIGHT→LEFT WatchDog). Rung 2: Optional_29(NC) checks DB904.DBW38 (HC LEFT→RIGHT WatchDog). If WatchDog == OldWatchDog (MW4) for 5 seconds (TON DB101.DBX1160.0, T#5s) → SET DB91.Alarme_76. In OB1 Nw18: FC3 uses Optional_03+Optional_29(NC), FC4 uses Optional_29(NO). With Optional_29=ON: FC3 does NOT run (NC open) but Rung 1 alarm IS enabled (NO closed) → monitors WatchDog that never updates → A076 triggers. ROOT CAUSE: Optional_29 contact polarity mismatch between FC91 Nw44 and OB1 Nw18 — Comecer original programming error.'},{ts:'Mar 28, 03:30 PM',text:'Tested fix: Changed Rung 1 Optional_29 from NO to NC. A076 cleared. Initially reverted to original code, but alarm kept coming back.'},{ts:'Mar 28, 08:30 PM',text:'FIX APPLIED PERMANENTLY: A076 no longer appears on HMI. Alarm cleared. Active alarms remaining: A107, A108 only.'}],
+     title:'A076 Room Communication Alarm — FIXED, alarm cleared',
+     done:true,doneAt:'Mar 28, 08:30 PM',
+     hint:'DONE. Root cause: FC91 Nw44 Optional_29 polarity mismatch vs OB1 Nw18. Fix applied. A076 cleared from HMI.'},
+    {id:'plc23',cat:'PLC',prio:'high',done:false,comments:[{ts:'Mar 28, 09:30 PM',text:'ELD Prechamber front door interlock logic needs tag replacement. Current code uses original Comecer tags for the front door (shielded door) but the prechamber ELD has its own door with different physical I/O. Need to cross-reference all interlock conditions in FC90 (W173, W174, W175, W176, W177 and related), FC52 (gasket inflate/deflate logic), FC54 (pre-chamber door control), and FC91 (alarms) — replace shielded front door tags with ELD prechamber front door tags. Essentially a tag swap across all relevant interlocks to ensure the ELD section references its own door sensors and outputs, not the main chamber front door. Similar scope to plc20 JB replacement but for ELD door tags.'}],
+     title:'ELD Prechamber front door interlocks — replace tags (door/gasket I/O) across FC52, FC54, FC90, FC91',
+     hint:'Change all interlock tags from main front door to ELD prechamber front door. Cross-reference and replace door closed, gasket inflated/deflated sensor tags and output tags in all relevant FCs. Tag swap — no logic change needed.'},
+    {id:'plc24',cat:'PLC',prio:'high',done:false,comments:[{ts:'Apr 01, 03:00 PM',text:'Front door shield deflate interlock needed. PROBLEM: Currently the front gasket can be deflated even when the shield door is closed. This is unsafe — if the gasket deflates while the shield door is closed, the operator cannot access the plexiglass (there is no plexiglass sensor — E12.2 is bypassed). REQUIREMENT: If shield door is CLOSED (E1.1 = 1 / M51.1 = 1) AND front gasket is INFLATED (E1.0 = 1 / M51.0 = 1), the deflate command must be BLOCKED. Deflation should only be allowed when shield door is OPEN (E1.1 = 0 / M51.1 = 0), because opening the door implies the operator has removed the plexiglass. IMPLEMENTATION: Add interlock condition in FC52 Nw13 (ELD precamara inflate/deflate logic) or FC54 Nw2 — the deflate SET rung for M63.1 (#A3.1) must include M51.1 as NC (door must be open to deflate). This replaces the missing plexiglass sensor interlock with a door-open requirement.'}],
+     title:'Front door shield deflate interlock — block deflate when shield door closed (no plexiglass sensor)',
+     hint:'Safety interlock: if shield door CLOSED + gasket INFLATED → cannot deflate. Deflate only allowed when shield door OPEN (assumes plexiglass removed). Add M51.1 NC condition to deflate rung in FC52 Nw13 or FC54 Nw2.'},
+    {id:'plc25',cat:'PLC',prio:'medium',done:false,comments:[{ts:'Apr 02, 10:00 PM',text:'HMI label corrections needed on-site when Julian returns. A1512: change label 15207 → 16207, change label 15308 → 17208. A1513: change label 15307 → 17307, change label 15308 → 17208. Also update labels for M1511W, M1512W, M1513W. These are HMI text/label updates only — no PLC logic change. Must be done on-site with TIA Portal HMI editor connected to TP700.'}],
+     title:'HMI label corrections — A1512 (15207→16207, 15308→17208), A1513 (15307→17307, 15308→17208), M1511W/M1512W/M1513W',
+     hint:'On-site HMI label update. A1512: 15207→16207, 15308→17208. A1513: 15307→17307, 15308→17208. Update M1511W, M1512W, M1513W labels. Julian on-site Monday Apr 6.'},
+    {id:'e30',cat:'ELECTRICAL',prio:'medium',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Apr 02, 10:30 PM',text:'On-site cable verification needed for E4.6 and E4.7 (N9023). E4.6: Schematic page shows cable 55101 but real cable is 91204 (Pre-Chamber Start/Stop Ventilation). Already corrected in drawing — need to physically verify the cable label on-site matches 91204. E4.7: Real cable is 91205 (Pre-Chamber Enable Doors Opening). Drawing already corrected — need to physically verify cable label on-site, may still have old label 55102.'},{ts:'Apr 07, 2026',text:'DONE. Orange jumper wire installed on terminal block for E4.6 and E4.7. Both inputs verified working. If customer wants to remove the bypass later, they can remove the orange jumper and connect their own enable signal.'}],
+     title:'Verify cable labels E4.6 (55101→91204) and E4.7 (55102→91205) on-site — N9023',
+     hint:'DONE. Orange jumper installed on terminal block. Customer can remove jumper and connect their own enable signal if needed.'},
+    {id:'e31',cat:'ELECTRICAL',prio:'medium',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Apr 02, 11:00 PM',text:'On-site verification: Input E6.0 cable 13007 is currently fed from 24L01 but should be on 24L03. Check wiring at terminal and move cable 13007 to correct 24V rail 24L03.'},{ts:'Apr 07, 2026',text:'DONE. E6.0 and E6.7 both connected to 24V rail 24L03. In this application the ITD door motor is PNEUMATIC (not electric) — no VFD installed, so E6.0 (Inverter Ready) and E6.7 (KM1301 Brake) are not needed from VFD. Connected to 24L03 to keep inputs permanently HIGH (satisfied). If customer later installs an electric motor, remove the 24L03 jumper and connect the VFD ready/brake signals.'}],
+     title:'E6.0 and E6.7 — connected to 24L03 (pneumatic motor, no VFD ready/brake needed)',
+     hint:'DONE. E6.0 (Inverter Ready) + E6.7 (Brake) jumpered to 24L03. Pneumatic motor — no VFD. Remove jumper if electric motor installed later.'},
+    {id:'e32',cat:'ELECTRICAL',prio:'medium',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Apr 02, 11:15 PM',text:'On-site verification: N9028 Digital Output Module (Page 925). Review output A10.1 — cable 92502 AWG18 BU to YV9252 (Quick Deflation valve) via KA9251 contactor. Verify wiring, contactor operation, and valve function. Also review A10.0 (cable 92301, Particle Counter Enable via XC161).'},{ts:'Apr 07, 2026',text:'DONE. A10.1 output replaced by A6.7 — this is the DEFLATABLE GASKETS RAPID VACUUM SYSTEM output. The original A10.1 (YV9252 Quick Deflation via KA9251) function is now handled through A6.7. Verified working.'}],
+     title:'Review N9028 output A10.1 — replaced by A6.7 (Deflatable Gaskets Rapid Vacuum System) — Page 925',
+     hint:'DONE. A10.1 replaced by A6.7 (Deflatable Gaskets Rapid Vacuum System). Verified working.'},
+    {id:'e34',cat:'ELECTRICAL',prio:'medium',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Apr 07, 2026',text:'E3.6 (cable 19601 AWG18 BU) = CONSENSO DA CLIENTE MARCIA/ARRESTO VENTILAZIONE — Enable From Customer Start/Stop Ventilation. E3.7 (cable 19602 AWG18 BU) = CONSENSO DA CLIENTE APERTURA PORTA — Enable From Customer Door Opening. Orange jumper wire installed on each input to keep them permanently HIGH (24V). These are customer enable signals — if the customer wants to control ventilation start/stop or door opening from their system, they remove the orange jumper and connect their own enable signal.'}],
+     title:'E3.6 and E3.7 — orange jumper installed (Enable From Customer: Ventilation + Door Opening)',
+     hint:'DONE. E3.6 (Start/Stop Ventilation) + E3.7 (Door Opening) jumpered to 24V with orange wire. Customer removes jumper to connect their own enable.'},
+    {id:'e33',cat:'ELECTRICAL',prio:'medium',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Apr 02, 11:30 PM',text:'On-site double verification of PAW270 analog output on N9022 (Page 911). PAW270 channels 1M and 1 drive Speed Reference Pre-Chamber Air Extraction Fan via cable A5151W (2x2xAWG22 Sh, 3m). Analog signals: 0-10V cable 91104 (channel 1M) and 0-10V cable 91103 (channel 1). Shields SH9111/SH9112 → 046.2.'},{ts:'Apr 07, 2026',text:'CONFIRMED: PAW270 1M and 1 verified against schematic Page 911. Channel assignment and cable numbers match. Speed reference working correctly.'}],
+     title:'Verify PAW270 (Pre-Chamber Extraction) and PAW268 (Main Extraction) channel/cable numbers — N9022 Page 911',
+     hint:'DONE. PAW270 1M/1 confirmed matching schematic. Speed reference working.'},
+    // ── DOCUMENTATION ────────────────────────────────────────────
+
+    // 1.2 Use and Maintenance Manual
+    {id:'d1',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.2] Use and Maintenance Manual — UM_CARDINAL_FLORIDA_V0653_R1_ENG. Format: Hardcopy / PDF. Assigned: JJ/Juan. Must incorporate all hardware changes, sensor relocations, and operational procedures modified during commissioning.'}],
+     title:'[1.2] MIP — Use and Maintenance Manual — UM_CARDINAL_FLORIDA_V0653_R1_ENG (Hardcopy/PDF)',
+     hint:'Assigned: JJ/Juan. Update manual to reflect as-built configuration and all field modifications.'},
+    {id:'d1b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.2] Use and Maintenance Manual for BBS machine. Format: Hardcopy / PDF. Assigned: JJ/Juan.'}],
+     title:'[1.2] BBS — Use and Maintenance Manual (Hardcopy/PDF)',
+     hint:'Assigned: JJ/Juan. BBS machine use and maintenance manual.'},
+
+    // 1.4 P&ID
+    {id:'d2',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.4] P&ID — V0653_PID_r01 — 80FMU00000.05. Format: PDF. Assigned: Juan. Needs update to reflect all field changes from commissioning. Engineering team working on updates.'}],
+     title:'[1.4] MIP — P&ID — 80FMU00000.05 — V0653_PID_r01 (PDF)',
+     hint:'Assigned: Juan. Update P&ID 80FMU00000.05 with all commissioning field modifications.'},
+    {id:'d2b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.4] P&ID for BBS machine. Format: PDF. Assigned: Juan.'}],
+     title:'[1.4] BBS — P&ID (PDF)',
+     hint:'Assigned: Juan. BBS machine P&ID.'},
+
+    // 1.5 Electrical Schematic
+    {id:'d3',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.5] Electrical Schematic / Diagram — V0653_ELEC_r01 — 80ZMJ0000F. Assigned: Juan. Redlines in hand. All red-line changes incorporated. PENDING APPROVAL.'}],
+     title:'[1.5] MIP — Electrical Schematic / Diagram — 80ZMJ0000F — V0653_ELEC_r01 (PDF) — PENDING APPROVAL',
+     hint:'PENDING APPROVAL. Assigned: Juan. Document complete, awaiting approval.'},
+    {id:'d3b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.5] Electrical Schematic for BBS machine. Format: PDF. Assigned: Juan.'}],
+     title:'[1.5] BBS — Electrical Schematic / Diagram (PDF)',
+     hint:'Assigned: Juan. BBS machine electrical schematic.'},
+
+    // 2.1 Operator Panel / Software Manual
+    {id:'d4',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[2.1] Operator Panel Manual / Software Manual — UM_SW_CARDINAL_FLORIDA_V0653_R1_ENG. Format: Hardcopy / PDF. Assigned: Juan. Highlight changes. Must reflect all HMI changes, alarm translations, SETUP pages, and PLC SW modifications (SW-001 to SW-032).'}],
+     title:'[2.1] MIP — Operator Panel / Software Manual — UM_SW_CARDINAL_FLORIDA_V0653_R1_ENG (Hardcopy/PDF)',
+     hint:'Assigned: Juan. Highlight changes. Update software manual with all HMI/PLC changes.'},
+    {id:'d4b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[2.1] Operator Panel Manual / Software Manual for BBS machine. Format: Hardcopy / PDF. Assigned: Juan.'}],
+     title:'[2.1] BBS — Operator Panel / Software Manual (Hardcopy/PDF)',
+     hint:'Assigned: Juan. BBS machine software manual.'},
+
+    // 3.1 Data Sheet List
+    {id:'d5',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[3.1] Data Sheet List — DS_CARDINAL_FLORIDA_V0653_R01. Format: PDF. Assigned: JJ. Make equivalencies and file. For both MIP and BBS.'}],
+     title:'[3.1] MIP — Data Sheet List — DS_CARDINAL_FLORIDA_V0653_R01 (PDF)',
+     hint:'Assigned: JJ. Make equivalencies and file.'},
+    {id:'d5b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[3.1] Data Sheet List for BBS machine. Format: PDF. Assigned: JJ. Make equivalencies and file.'}],
+     title:'[3.1] BBS — Data Sheet List (PDF)',
+     hint:'Assigned: JJ. Make equivalencies and file.'},
+
+    // 3.2 Certificate List
+    {id:'d6',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[3.2] Certificate List — CL_CARDINAL_FLORIDA_V0653_R01. Format: Hardcopy / PDF. Assigned: JJ. Make equivalencies and file.'}],
+     title:'[3.2] MIP — Certificate List — CL_CARDINAL_FLORIDA_V0653_R01 (Hardcopy/PDF)',
+     hint:'Assigned: JJ. Make equivalencies and file.'},
+    {id:'d6b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[3.2] Certificate List for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. Make equivalencies and file.'}],
+     title:'[3.2] BBS — Certificate List (Hardcopy/PDF)',
+     hint:'Assigned: JJ. Make equivalencies and file.'},
+
+    // 4.5 SAT Protocol
+    {id:'d7',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[4.5] SAT Protocol — SAT_V0653_r01. Format: Hardcopy / PDF. Assigned: JJ. No leak testing. Document complete. PENDING APPROVAL.'}],
+     title:'[4.5] MIP — SAT Protocol — SAT_V0653_r01 (Hardcopy/PDF) — PENDING APPROVAL',
+     hint:'PENDING APPROVAL. Assigned: JJ. No leak testing. Document complete, awaiting approval.'},
+    {id:'d7b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[4.5] SAT Protocol for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. No leak testing. Document complete. PENDING APPROVAL.'}],
+     title:'[4.5] BBS — SAT Protocol (Hardcopy/PDF) — PENDING APPROVAL',
+     hint:'PENDING APPROVAL. Assigned: JJ. No leak testing. Document complete, awaiting approval.'},
+
+    // 4.6 IOQ Protocol
+    {id:'d8',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[4.6] IOQ Protocol — IOQ_V0653_r01. Format: Hardcopy / PDF. Assigned: JJ. Document complete. PENDING APPROVAL.'}],
+     title:'[4.6] MIP — IOQ Protocol — IOQ_V0653_r01 (Hardcopy/PDF) — PENDING APPROVAL',
+     hint:'PENDING APPROVAL. Assigned: JJ. Document complete, awaiting approval.'},
+    {id:'d8b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[4.6] IOQ Protocol for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. Document complete. PENDING APPROVAL.'}],
+     title:'[4.6] BBS — IOQ Protocol (Hardcopy/PDF) — PENDING APPROVAL',
+     hint:'PENDING APPROVAL. Assigned: JJ. Document complete, awaiting approval.'},
+
+    // Pneumatic Diagram
+    {id:'d9',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'Pneumatic diagram 80PIX00000.07 MIP FULL LAF needs update with all pneumatic field changes from commissioning.'}],
+     title:'MIP — Pneumatic Diagram — 80PIX00000.07 MIP FULL LAF — update with field changes',
+     hint:'Update pneumatic diagram 80PIX00000.07 with all commissioning pneumatic modifications.'},
+
+    // ── PLC I/O VERIFICATION BY MODULE ──────────────────────────
+
+    {id:'plc5',cat:'PLC',prio:'high',done:true,
+     doneAt:'Mar 23, 07:00 PM',
+     comments:[{ts:'Mar 23, 07:00 PM',text:'N9020 DO VERIFICATION COMPLETE (Page 905). VERIFIED OK: A0.0 Internal Receptacles 1 (KA9051) \u2713 · A0.1 Internal Receptacles 2 (KA9052) \u2713 · A0.2 Internal Receptacles 3 (KA9053) \u2713 · A0.3 Internal Receptacles 4 (KA9054) \u2713 · A0.4 Start Ventilation (KA9055) \u2713 · A0.5 Cell Internal Lights (KA9055A/KA9056) \u2713 · A1.1 Negative Pressure OK (KA9057) \u2713. NOT IMPLEMENTED IN THIS SYSTEM: A0.6 Light Alarm Signal \u2718 · A0.7 Light OK Signal \u2718 · A1.0 Fault Signal \u2718. These 3 outputs are not connected/used in this installation — marked N/A.'},{ts:'Mar 25, 06:30 PM',text:'HARDWARE CHANGE: KA9055A and KA9055B (80ATS) removed from output A0.4 (N9020 Page 905) and relocated to output A4.1 (N9023 Page 913). KA9055A+B did not exist originally on A0.4 — they were removed and moved to module N9023. Physical connection made with cable 91302 AWG18 BU to A4.1 DQa, through KA9055B and A9055A (80ATS). PENDING: change in PLC software the assignment of KA9055A/B from A0.4 to A4.1 (%Q from N9020 to N9023).'}],
+     title:'N9020 DO — verify all digital outputs (A0.0–A1.1) Page 905',
+     hint:'DONE (original verification). NOTE: KA9055A/B removed from A0.4 and relocated to A4.1 on N9023 (Mar 25). PLC software update pending.'},
+
+    {id:'plc6',cat:'PLC',prio:'high',done:true,doneAt:'Mar 23, 08:30 PM',comments:[{ts:'Mar 23, 08:15 PM',text:'E3.1 Front Door Gasket Pressure — verified OK. E3.2 Front Door Plexiglass Presence — software task pending: remove/bypass plexiglass presence check in PLC logic.'},{ts:'Mar 23, 08:30 PM',text:'All inputs E3.0–E3.7 verified OK. Schematic modified (red lines) to reflect new logic with rerouted cables at node 90710/90711. Input verification complete.'}],
+     title:'N9021 DI — verify digital inputs E3.0–E3.7 Page 907',
+     hint:'DONE. All inputs verified. Schematic updated with red-line modifications for new logic. E3.2 plexiglass presence bypass handled as separate programming task (P4).'},
+    {id:'e19',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 23, 08:30 PM',comments:[{ts:'Mar 23, 08:30 PM',text:'Red-line schematic completed for N9021 E3.x inputs — new logic routing documented on Page 907. Node 90710/90711 rerouted.'}],
+     title:'Red-line schematic N9021 Page 907 — document new wiring logic for E3.x inputs',
+     hint:'Modify electrical schematic with red lines to reflect new cable routing and logic changes on digital input module N9021.'},
+    {id:'e20',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 7, 04:00 AM',comments:[{ts:'Mar 23, 08:30 PM',text:'Physical cable modifications required per red-line schematic Page 907. Reroute cables at node 90710/90711 to match new logic.'},{ts:'Apr 7, 04:00 AM',text:'DONE. Physical cable modifications completed per red-line schematic N9021 Page 907.'}],
+     title:'Modify physical cables per red-line schematic N9021 Page 907 — reroute wiring for new logic',
+     hint:'DONE. Cable rerouting at node 90710/90711 completed per red-line schematic for new input logic on N9021 module.'},
+    {id:'e22',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Mar 25, 11:30 AM',text:'FG0511 (Pre-Chamber Extraction Fan filter): VN cable is black and incorrect AWG. Must be WHITE AWG10 per schematic (VL1=BK AWG10, VL2=BK AWG10, VN=WH AWG10). Change VN cable from black to white AWG10. Same correction on QF5151 (2A breaker Pre-Chamber Air Extraction Fan): VN cable connected black — change to white AWG10 to match schematic. PE0511 AWG12 GNYE maintain minimum distance to Ground Bar.'},{ts:'Mar 26, 11:45 PM',text:'Ref schematic Page 515 (Pre-Chamber Air Extraction Fan). ADDITIONAL ISSUES FOUND: (1) QU5151 (fuse upstream of A5151 VFD, Phoenix Contact 2864082) has NO FUSE installed — empty fuse holder. Must install fuse before commissioning Pre-Chamber Exhaust at full power. (2) Cable 51502 (AWG18 BU from A5151 output to KA9097 circuit) had incorrect values — CORRECTED. (3) Cable 91103 (from QU5151 to A5151 input) had incorrect values — CORRECTED. VN cable changes (e22 original scope) also done. REMAINING: install fuse in QU5151.'},{ts:'Apr 7, 10:00 AM',text:'STILL PENDING: White 10AWG VN cables for FG0511, QF5151, QU5151 not yet installed. Must run white 10AWG cables to complete VN correction per schematic Page 515.'},{ts:'Apr 7, 11:00 AM',text:'QU5151 fuse PURCHASED and INSTALLED. Fuse holder no longer empty. REMAINING: only VN white 10AWG cable changes on FG0511, QF5151, QU5151.'}],
+     title:'FG0511 + QF5151 + QU5151 — VN white cables (Pre-Chamber Extraction Fan)',
+     hint:'QU5151 fuse INSTALLED. REMAINING: Install WHITE 10AWG VN cables on FG0511, QF5151, QU5151 per schematic Page 515. Cables 51502 and 91103 already corrected.'},
+    {id:'e23',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 25, 12:00 PM',comments:[{ts:'Mar 25, 12:00 PM',text:'Pre-Chamber Extraction Fan motor replaced. Old motor tripped breaker QF5151. Root cause: incorrect motor installed (voltage/current mismatch). Changed to proper 120 VAC motor. Breaker no longer trips — fan operating correctly.'}],
+     title:'Pre-Chamber Extraction Fan — motor replacement (old one tripped breaker QF5151) — changed to 120 VAC',
+     hint:'DONE. Old motor caused trip on QF5151. Replaced with correct 120 VAC motor. Fan operating without trip.'},
+    {id:'e26',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 25, 05:00 PM',comments:[{ts:'Mar 25, 05:00 PM',text:'M1501 motor cables (Main Chamber Exhaust Fan) changed and connection corrected. Motor operating correctly with VFD A1501.'}],
+     title:'M1501 Main Chamber Exhaust Fan — change motor cables and correct connection',
+     hint:'DONE. Motor M1501 cables corrected. Connection fixed. Motor running with VFD A1501.'},
+    {id:'e25',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Mar 25, 03:30 PM',text:'A3.6 Pre-Chamber Start Ventilation (KA9097) in N9021 Page 909: VN cable (neutral) is black — must be WHITE AWG10 per schematic. Same type of error as FG0511/QF5151 (e22). Change cable to enable A3.6 output.'}],
+     title:'A3.6 KA9097 Pre-Chamber Ventilation — change VN cable from black to white AWG10',
+     hint:'Cable VN on A3.6 (KA9097) is black with incorrect AWG. Change to white AWG10 per schematic Page 909. Required to enable Pre-Chamber Start Ventilation.'},
+
+    {id:'plc7',cat:'PLC',prio:'high',done:true,doneAt:'Mar 23, 11:00 PM',comments:[{ts:'Mar 23, 10:45 PM',text:'Root cause found: DQa and DQb output cables were crossed — all cables shifted by one position, explaining why multiple outputs were not functioning. Also cables 90803 (YV9081A) and 90804 (YV9081B) were swapped/reversed.'},{ts:'Mar 23, 11:00 PM',text:'All outputs verified after rewiring: A2.0 Front Door OPEN (KA9081) OK · A2.1 Front Door CLOSE (KA9082) OK · A2.2 Gasket INFLATE (YV9081A/B) OK · A2.3 Gasket DEFLATE OK · A2.4 Safety Switch By-Pass OK. A2.5 Calibrator UP, A2.6 Calibrator DOWN, A2.7 Front Door UNLOCK — not used in this system, confirmed no connection.'}],
+     title:'N9021 DO — verify digital outputs A2.0–A2.7 (door commands) Page 908',
+     hint:'DONE. A2.0–A2.4 verified OK after DQa/DQb rewire. A2.5–A2.7 not used in this system.'},
+    {id:'e21',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 23, 11:00 PM',comments:[{ts:'Mar 23, 10:45 PM',text:'Found all DQa/DQb output cables on N9021 DO module were shifted — crossed between port A and port B. This was the root cause for multiple outputs not activating (including A2.2 gasket inflate). Additionally nodes 90803 (YV9081A) and 90804 (YV9081B) were wired in reverse.'},{ts:'Mar 23, 11:00 PM',text:'Rewiring complete. All DQa/DQb cables corrected. 90803/90804 swapped to correct positions. All A2.0–A2.4 outputs tested and responding correctly.'}],
+     title:'N9021 DO Page 908 — rewire crossed DQa/DQb cables + swap 90803/90804 (YV9081A/B reversed)',
+     hint:'DONE. All cables rewired to correct DQa/DQb positions. 90803/90804 swapped. Outputs verified.'},
+
+    {id:'plc8',cat:'PLC',prio:'high',done:true,doneAt:'Mar 25, 11:00 AM',comments:[{ts:'Mar 25, 11:00 AM',text:'All ELD Prechamber outputs verified. A3.0 inflate (YV9091A) and A3.1 deflate (YV9091B) confirmed working. Gasket retains 3 bar with main air and power OFF.'},{ts:'Mar 25, 03:30 PM',text:'OUTPUT DETAILS Page 909: A3.0 ELD Gasket Inflate (YV9091A) = DONE. A3.1 ELD Gasket Deflate (YV9091B) = DONE. A3.2 Drawing System Lavaggio (YV9092) = DONE — not used in this system. A3.3 Drawing System LD Gasket ON (YV9093A) = DONE — not used. A3.4 Drawing System LD Gasket OFF (YV9093B) = DONE — not used. A3.5 Interlock Tray (YV9094) = DONE — not used. A3.6 Pre-Chamber Start Ventilation (KA9097) = PENDING — need to change cable VN to white AWG10 (see e25). A3.7 Pre-Chamber Door Closed + ED optional (KA9098) = DONE.'}],
+     title:'N9021 DO — verify digital outputs A3.0–A3.7 (Prechamber ELD + pre-chamber) Page 909',
+     hint:'DONE (7/8). A3.0-A3.5 and A3.7 verified. A3.2-A3.5 not used in this system. A3.6 (KA9097 Pre-Chamber Start Ventilation) PENDING: change cable VN to white AWG10 (e25).'},
+
+    {id:'plc9',cat:'PLC',prio:'high',done:true,doneAt:'Mar 28, 09:00 PM',comments:[{ts:'Mar 25, 12:30 PM',text:'A9101 (temp/humidity sensor SH9102) in troubleshooting — error in N9022 module. PEW260 (temperature) and PEW262 (humidity) not reading correctly. Cause of alarms A102 and A103. Under correction.'},{ts:'Mar 25, 03:00 PM',text:'N9022 wiring corrected. ALL analog sensors now reading correctly: PEW260 (temp), PEW262 (humidity), PEW264 (air velocity A9102). A9102 adjusted with high-density holder. PENDING FAT: apply all readings to calibrated values.'},{ts:'Mar 25, 04:00 PM',text:'N9022 ANALOG OUTPUTS Page 911: PAW268 (Extraction Fan Speed Reference A1501W, cable A1501W 2x0.5AWG22 Sh, SH9111/SH9112) = DONE — verified. PAW270 (Pre-Chamber Air Extraction Fan Speed Reference A5151W, cable A5151W 2x0.5AWG22 Sh) = PENDING — missing all PLC and HMI logic for Pre-Chamber Exhaust Fan (see p5 and plc17).'},{ts:'Mar 28, 09:00 PM',text:'N9022 AI/AO complete. All analog inputs reading correctly, all analog outputs operational. Remaining: scale/calibrate sensor values during FAT.'}],
+     title:'N9022 AI/AO — verify analog I/O (temp, humidity, LAF, extraction fans) Page 910–911',
+     hint:'DONE. All AI/AO verified and operational. Scaling/calibration of sensor values pending FAT.'},
+
+    {id:'plc10',cat:'PLC',prio:'high',done:true,doneAt:'Mar 25, 11:00 AM',comments:[{ts:'Mar 25, 09:00 AM',text:'All A4.0–A4.7 outputs physically connected to SM 1223 DC/DC module. Cables were not connected before — now wired to PLC. Ready for output verification and testing.'},{ts:'Mar 25, 11:00 AM',text:'ELD section complete. A4.0 Prechamber ELD Lateral Door Gasket Inflate (YV9131) verified. All A4.x outputs connected and tested.'},{ts:'Mar 25, 06:30 PM',text:'A4.1 now has KA9055A/B (80ATS) — relocated from A0.4 N9020. Cable 91302 AWG18 BU. Pending PLC software update (see plc18).'},{ts:'Mar 26, 08:30 PM',text:'E4.6 and E4.7 reassigned: signals 55101 (Pre-Chamber Enable Start/Stop Ventilation) and 55102 (Pre-Chamber Enable Doors Opening) came from JB Prechamber which DOES NOT EXIST in this project. Replaced with new tags: 91204 → E4.6 (%M54.6) Abilitazione Precamera Marcia/Arresto Ventilazione, 91205 → E4.7 Abilitazione Apertura Porte Precamera. Ref: schematic Page 551/900 (Consensi Disponibile da Cliente Precamera) and N9023 DI Page 912.'},{ts:'Mar 26, 09:00 PM',text:'N9023 DI Page 912 — FINAL MAP UPDATED: E4.0 = Exhaust Inverter Ready (Healthy) 1=ON ✓ OK. E4.1 = NOT CONNECTED (was Inverter Immissione Camera — not used). E4.2 = LAF Obstruction Second Filter (as original). E4.3 = LAF 1 VFD OK Healthy ✓. E4.4 = LAF 2 VFD OK Healthy ✓. E4.5 = LAF 3 VFD OK Healthy ✓. E4.6 = 91204 Pre-Chamber Enable Start/Stop Ventilation (replaces 55101 from non-existent JB). E4.7 = 91205 Pre-Chamber Enable Doors Opening (replaces 55102 from non-existent JB). Red-line markup in schematic Page 912.'},{ts:'Mar 26, 09:30 PM',text:'⚠️ JUMPER installed on E4.2 (LAF Obstruction Second Filter / SP9123). SP9123 differential pressure sensor for second filter not present — input jumpered to not block LAF operation. URGENT: verify if SP9123 applies to this configuration and if sensor must be installed or jumper kept permanent.'}],
+     title:'N9023 DI/DO — verify LAF obstruction inputs + Prechamber ELD lateral gasket output Page 912–913',
+     hint:'DONE. DI map: E4.0 Exhaust Inv Ready ✓, E4.1 NC, E4.2 JUMPER (SP9123 LAF Obstruction — pending verify if applies), E4.3 LAF1 Healthy ✓, E4.4 LAF2 Healthy ✓, E4.5 LAF3 Healthy ✓, E4.6=91204 PreCh Start/Stop Vent, E4.7=91205 PreCh Enable Doors. A4.0–A4.7 outputs verified.'},
+
+    {id:'plc11',cat:'PLC',prio:'high',done:true,doneAt:'Mar 28, 08:00 PM',comments:[{ts:'Mar 28, 08:00 PM',text:'N9024 DI verified. E6.0 (Inverter Ready) N/A — A1301 removed. E6.1 ITD Door OPEN limit switch OK. E6.2 ITD Door CLOSE limit switch OK. E6.3 Telephone ITD in position OK. E6.5 ITD Gasket Pressure Gauge OK. E6.6 Tray Home Position sensor added (replaces JB E12.4/E12.5). E6.7 (KM1301 Brake) N/A — motor removed. All active inputs verified in PLC online.'}],
+     title:'N9024 DI — verify internal door ITD inputs E6.0–E6.7 Page 916',
+     hint:'DONE. A1301 removed → E6.0/E6.7 N/A. E6.1 Door OPEN ✓, E6.2 Door CLOSE ✓, E6.3 Telephone ✓, E6.5 Gasket Pressure ✓, E6.6 Tray Home (new, replaces JB) ✓.'},
+
+    {id:'plc12',cat:'PLC',prio:'high',done:true,doneAt:'Mar 28, 08:00 PM',comments:[{ts:'Mar 25, 08:30 AM',text:'SCHEMATIC CHANGE: YV9174 (Inflatable Gaskets Rapid Deflation Vacuum) moved from A6.4 to A6.7. Red-line on N9024 Page 917. A6.4 now Safety Blocking Valve, A6.5 spare, A6.6 spare, A6.7 = YV9174. PLC tag table updated: #A6.4 %M66.4 = Control ITD Safety Blocking Valve OPT.ITD, #A6.5 %M66.5 = Pre-consent chamber ITD Door Closed OPT ITD RAPID DEFLATION, #A6.6 %M66.6 = Pre-consent chamber ITD Door Open OPT ITD VENTURI, #A6.7 %M66.7 = OPT main VENTURI electro valve.'},{ts:'Mar 28, 08:00 PM',text:'All N9024 DO outputs verified online: A6.0 Door OPEN ✓, A6.1 Door CLOSE ✓, A6.2 Gasket INFLATE ✓ (SET/RESET conflict fixed), A6.3 Gasket DEFLATE ✓ (NO→NC for vacuum), A6.4 Safety Blocking Valve ✓, A6.5 Quick Deflation ✓, A6.7 Venturi Vacuum ✓ (moved from A6.4). All outputs force-tested and operational in pneumatic mode.'}],
+     title:'N9024 DO — verify internal door ITD outputs A6.0–A6.7 Page 917',
+     hint:'DONE. All outputs verified: A6.0 OPEN ✓, A6.1 CLOSE ✓, A6.2 INFLATE ✓ (SET/RESET fixed), A6.3 DEFLATE ✓ (NO→NC), A6.4 Safety ✓, A6.5 Quick Deflation ✓, A6.7 Venturi ✓ (moved from A6.4). YV9174 red-line confirmed.'},
+
+    {id:'plc13',cat:'PLC',prio:'high',done:true,doneAt:'Mar 25, 08:30 PM',comments:[{ts:'Mar 25, 05:30 PM',text:'SHORT CIRCUIT detected in N9031 LAF analog output card.'},{ts:'Mar 25, 06:00 PM',text:'Cable short RESOLVED. VFD A1511 not starting — DI1=ON but STOP MODE.'},{ts:'Mar 25, 08:00 PM',text:'LAF 1 (A1511) resolved and running.'},{ts:'Mar 25, 08:30 PM',text:'LAF 2 and LAF 3 programmed in VFD and tested OK. 3 LAF fans running. Missing PID speed control — detailed programming later.'},{ts:'Mar 25, 09:00 PM',text:'LAF 1 rotation direction verified OK — blows toward chamber.'},{ts:'Mar 25, 09:15 PM',text:'LAF 2 tested OK — rotation direction and operation verified. Missing LAF 3 test.'},{ts:'Mar 25, 09:30 PM',text:'LAF 3 verified OK. 3 LAFs (1, 2, 3) operating correctly — did NOT need to change cable direction on any. Correct rotation on all 3.'},{ts:'Mar 26, 10:30 PM',text:'MAJOR CHANGE: N9031 card REMOVED — not available and not needed. All LAF analog speed reference outputs RELOCATED from N9031 to N9032 (80ATS Kit Integrazione MIP Full LAF, Page 928). N9032 has 4 channels: PAW230 (0M/0) = LAF 1 Speed Ref (SH9291, cables 92902-/92901+, 0-10V, wire 153.4), PAW232 (1M/1) = LAF 2 Speed Ref (SH9292, cables 92904-/92903+, 0-10V, wire 153.7), PAW234 (2M/2) = LAF 3 Speed Ref (SH9293, cables 92906-/92905+, 0-10V, wire 154.4), PAW236 (3M/3) = LAF 4 Speed Ref (SH9294, cables 92908-/92907+, 0-10V, wire 154.7). PLC tags reassigned from old N9031 addresses (PAW272-274) to new N9032 addresses (PAW230-236). Labels changed on cables and module. VFD A1511 Page 151 annotations: 92904/92903 → SH9293, 94802/94801 → A1513W. A1512=LAF2 (15208/16103-17103), A1513=LAF3 (15308/17104-17105).'},{ts:'Mar 26, 11:00 PM',text:'TIA Portal HW Config confirmed: N9031 (Slot 7) SM 1232 AQ — green check but physically removed. Original addresses: PAW272, PAW274, PAW276, PAW278. N9032 (Slot 8) SM 1232 AQ — shows error (red X) in TIA, HW config being updated. NEW address mapping on N9032: %QW230, %QW232, PAW234, PAW236. Tags and labels reassigned. HW config download to PLC pending to clear N9032 error state.'},{ts:'Mar 26, 11:30 PM',text:'HMI control of LAF speed via N9032 is WORKING — analog output responds to HMI slider. ISSUE: at 100% HMI command, VFD only reaches 34.1 Hz instead of expected 50 Hz (68.2% of max).'},{ts:'Mar 26, 11:45 PM',text:'FC2 (InOut) Network 4 — SALIDAS ANALÓGICAS reviewed. LAF scaling code: PAW230 = REAL_TO_UINT((ObjPid.ID[4].Output * 27648.0) / 100.0), PAW232=ID[5], PAW234=ID[6], PAW236=ID[7]. Formula is CORRECT — at Output=100.0 it writes 27648 (=10V on SM 1232 AQ). Problem is NOT in FC2 scaling. Root cause: ObjPid.ID[4].Output is not reaching 100.0 when HMI shows 100%. Debug next: (1) Monitor ObjPid.ID[4].Output in watch table at HMI 100% — expected 100.0, probably ~68.2. (2) Check ObjPid.ID[4] setpoint/configuration — is there an output limit or clamping? (3) Check HMI tag binding — does the HMI write directly to ObjPid.ID[4].Output or to a setpoint that goes through PID? CRITICAL but not urgent — fans run at reduced speed.'},{ts:'Mar 27, 12:00 AM',text:'UPDATE: After A5151 VFD S2 DIP switch fix (see plc17), engineer suspects the 34.1 Hz limit is caused by VFD max frequency parameter being misprogrammed — NOT a PLC software issue. ObjPid.ID[4].Output may be correct at 100.0 but VFD internal max freq limit capping output at 34.1 Hz. Separate task plc19 created to verify and correct VFD E3-1PH speed limit parameters (P-01 Max Freq, P-02 Min Freq, etc.) on all 3 LAF drives. PLC software investigation deprioritized until VFD parameters are checked first.'}],
+     title:'N9031→N9032 AO — LAF analog outputs relocated to 80ATS kit module Page 928',
+     hint:'N9031 REMOVED. LAF speed refs on N9032: PAW230=LAF1, PAW232=LAF2, PAW234=LAF3, PAW236=LAF4. HMI control WORKS but SCALING ISSUE: 100% HMI = 34.1 Hz (should be 50 Hz). FC2 InOut Nw4 formula CORRECT: REAL_TO_UINT((ObjPid.ID[4].Output * 27648.0)/100.0). Problem upstream: ObjPid.ID[4].Output not reaching 100.0. DEBUG: monitor ObjPid.ID[4].Output in DB watch (optimized DB — use symbolic path, not absolute address). Check PID output limits and HMI tag binding.'},
+
+    // Marked DONE — not in scope (particle counter, autoclave, solid waste, 80ATT)
+    {id:'plc14',cat:'PLC',prio:'low',done:true,
+     doneAt:'Mar 21, 03:30 PM',
+     comments:[{ts:'Mar 21, 03:30 PM',text:'Out of scope for this commissioning phase. Systems not installed/active: Particle Counter, Autoclave, Solid Waste, 80ATT LAF integration, Camera & Monitor.'}],
+     title:'N9026/N9027/N9028/N9030/N9032 — Autoclave, Solid Waste, Particle Counter, 80ATT LAF, Camera (NOT IN SCOPE)',
+     hint:'Pages 920-929. These systems are not part of the current commissioning scope: N9026 Autoclave I/O, N9027 Solid Waste I/O, N9028/N9030 Particle Counter I/O, N9032 80ATS LAF integration. Marked done for record — will be addressed in a separate commissioning phase.'},
+  ];
+}
+
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+var tasks = [];
+var isEditor = false;
+var currentFilter = 'all';
+var currentCatFilter = null;
+var currentMachFilter = null; // null = all, 'MIP' or 'BBS'
+
+// ─────────────────────────────────────────────────────────────
+// PURGE OLD VERSIONS — clean up stale localStorage keys on boot
+// ─────────────────────────────────────────────────────────────
+(function purgeOldKeys() {
+  try {
+    var keysToRemove = [];
+    for (var k = 0; k < localStorage.length; k++) {
+      var key = localStorage.key(k);
+      if (key && key.indexOf('comecer-v0653-') === 0 && key !== LS_KEY) {
+        keysToRemove.push(key);
+      }
+    }
+    for (var r = 0; r < keysToRemove.length; r++) {
+      localStorage.removeItem(keysToRemove[r]);
+    }
+  } catch(e) {}
+})();
+
+// ─────────────────────────────────────────────────────────────
+// STORAGE  — localStorage primary, shared storage secondary
+// Tasks are always rendered immediately from defaults/localStorage
+// ─────────────────────────────────────────────────────────────
+function loadFromLS() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (raw) { tasks = JSON.parse(raw); return true; }
+  } catch(e) {}
+  return false;
+}
+
+function saveToLS() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(tasks)); } catch(e) {}
+}
+
+async function saveToShared() {
+  try {
+    if (typeof window.storage !== 'undefined') {
+      await window.storage.set(LS_KEY, JSON.stringify(tasks), true);
+    }
+  } catch(e) {}
+}
+
+async function loadFromShared() {
+  try {
+    if (typeof window.storage !== 'undefined') {
+      var r = await window.storage.get(LS_KEY, true);
+      if (r && r.value) {
+        var parsed = JSON.parse(r.value);
+        if (parsed && parsed.length) {
+          tasks = parsed;
+          saveToLS();
+          return true;
+        }
+      }
+    }
+  } catch(e) {}
+  return false;
+}
+
+async function persist() {
+  saveToLS();
+  await saveToShared();
+}
+
+// Boot: render immediately, then try to sync from shared
+function boot() {
+  var loaded = loadFromLS();
+  if (!loaded) {
+    tasks = getDefaults();
+    saveToLS();
+  }
+  renderAll();
+  // Background sync from shared storage
+  loadFromShared().then(function(got) {
+    if (got) renderAll();
+  });
+}
+
+// Background refresh every 20s
+setInterval(function() {
+  loadFromShared().then(function(got) { if (got) renderAll(); });
+}, 20000);
+
+// ─────────────────────────────────────────────────────────────
+// CLOCK
+// ─────────────────────────────────────────────────────────────
+function tick() {
+  var n = new Date();
+  document.getElementById('clock').textContent =
+    n.toLocaleTimeString('en-US',{hour12:false}) + ' · ' +
+    n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+setInterval(tick, 1000); tick();
+
+// ─────────────────────────────────────────────────────────────
+// SECRET ACCESS — triple-click the V0653 badge
+// ─────────────────────────────────────────────────────────────
+// Badge double-click still works as backup
+document.getElementById('headerBadge').addEventListener('dblclick', function() {
+  if (isEditor) return;
+  openPin();
+});
+
+function openPin() {
+  document.getElementById('pinField').value = '';
+  document.getElementById('pinError').textContent = '';
+  document.getElementById('pinPopup').classList.add('open');
+  setTimeout(function(){ document.getElementById('pinField').focus(); }, 80);
+}
+function closePin() { document.getElementById('pinPopup').classList.remove('open'); }
+function pinPopupBg(e) { if (e.target.id === 'pinPopup') closePin(); }
+
+function tryUnlock() {
+  var entered = document.getElementById('pinField').value;
+  if (entered === PIN) {
+    isEditor = true;
+    closePin();
+    document.body.classList.remove('view-mode');
+    updateLockBtn();
+    showToast('Editor mode active');
+  } else {
+    document.getElementById('pinError').textContent = 'Incorrect — try again';
+    document.getElementById('pinField').value = '';
+    document.getElementById('pinField').focus();
+  }
+}
+function lockEditor() {
+  isEditor = false;
+  document.body.classList.add('view-mode');
+  updateLockBtn();
+}
+function lockBtnClick() {
+  if (isEditor) {
+    lockEditor();
+  } else {
+    openPin();
+  }
+}
+
+function updateLockBtn() {
+  var btn = document.getElementById('lockBtn');
+  btn.textContent = isEditor ? '🔓' : '🔒';
+  btn.title = isEditor ? 'Exit editor mode' : 'Admin access';
+}
+
+// ─────────────────────────────────────────────────────────────
+// FILTER
+// ─────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderTasks();
+}
+function setMachFilter(m) {
+  currentMachFilter = m;
+  var btns = document.querySelectorAll('.mach-btn');
+  for (var i=0; i<btns.length; i++) {
+    btns[i].classList.remove('active-mach');
+    btns[i].style.background = 'transparent';
+  }
+  if (m === null) {
+    document.getElementById('machAll').classList.add('active-mach');
+    document.getElementById('machAll').style.background = 'var(--amber-dim)';
+  } else if (m === 'MIP') {
+    document.getElementById('machMIP').classList.add('active-mach');
+    document.getElementById('machMIP').style.background = 'rgba(249,115,22,0.15)';
+  } else if (m === 'BBS') {
+    document.getElementById('machBBS').classList.add('active-mach');
+    document.getElementById('machBBS').style.background = 'rgba(59,130,246,0.15)';
+  }
+  renderAll();
+}
+function filterCat(cat) {
+  currentCatFilter = currentCatFilter === cat ? null : cat;
+  renderTasks();
+}
+
+// ─────────────────────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────────────────────
+function renderStats() {
+  var td = 0, ta = 0;
+  var cats = Object.keys(CAT_META);
+  for (var i = 0; i < cats.length; i++) {
+    var catKey = cats[i];
+    var m = CAT_META[catKey];
+    var ct = tasks.filter(function(t){ return t.cat === catKey; });
+    var done = ct.filter(function(t){ return t.done; }).length;
+    document.getElementById('stat-' + m.sid).innerHTML = done + ' <span>/ ' + ct.length + '</span>';
+    document.getElementById('fill-' + m.sid).style.width = (ct.length ? Math.round(done/ct.length*100) : 0) + '%';
+    td += done; ta += ct.length;
+  }
+  var op = ta ? Math.round(td/ta*100) : 0;
+  document.getElementById('overallFill').style.width = op + '%';
+  document.getElementById('overallPct').textContent = op + '%';
+}
+
+// ─────────────────────────────────────────────────────────────
+// RENDER TASKS
+// ─────────────────────────────────────────────────────────────
+function renderAll() { renderStats(); renderTasks(); }
+
+function renderTasks() {
+  var search = document.getElementById('searchInput').value.toLowerCase().trim();
+  var el = document.getElementById('taskList');
+  el.innerHTML = '';
+  var any = false;
+  var cats = Object.keys(CAT_META);
+
+  for (var ci = 0; ci < cats.length; ci++) {
+    var catKey = cats[ci];
+    var meta = CAT_META[catKey];
+
+    if (currentCatFilter && currentCatFilter !== catKey) continue;
+
+    var prioOrder = {high:0, med:1, low:2};
+    var list = tasks.filter(function(t) {
+      if (t.cat !== catKey) return false;
+      if (currentFilter === 'done' && !t.done) return false;
+      if (currentFilter === 'pending' && t.done) return false;
+      if (currentMachFilter && (t.mach || 'MIP') !== currentMachFilter) return false;
+      if (search) {
+        var s = search;
+        var code = (t.code || t.id || '').toLowerCase();
+        var machStr = (t.mach || 'MIP').toLowerCase();
+        if (!t.title.toLowerCase().includes(s) &&
+            !code.includes(s) &&
+            !machStr.includes(s) &&
+            !(t.hint||'').toLowerCase().includes(s)) return false;
+      }
+      return true;
+    }).sort(function(a, b) {
+      // Done tasks always go to bottom
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      // Then sort by priority
+      return (prioOrder[a.prio]||1) - (prioOrder[b.prio]||1);
+    });
+
+    if (!list.length) continue;
+    any = true;
+
+    var done = list.filter(function(t){ return t.done; }).length;
+
+    var g = document.createElement('div');
+    g.className = 'category-group';
+    g.innerHTML =
+      '<div class="cat-header">' +
+        '<div class="cat-dot" style="background:' + meta.color + '"></div>' +
+        '<div class="cat-name" style="color:' + meta.color + '">' + meta.icon + ' ' + catKey + '</div>' +
+        '<div class="cat-count">' + done + '/' + list.length + ' done</div>' +
+      '</div>' +
+      '<div id="gl-' + catKey + '"></div>';
+    el.appendChild(g);
+
+    var lc = document.getElementById('gl-' + catKey);
+    // Use IIFE to capture catKey and meta per iteration
+    (function(ck, cm, lst) {
+      for (var ti = 0; ti < lst.length; ti++) {
+        lc.appendChild(buildCard(lst[ti], ck, cm));
+      }
+    })(catKey, meta, list);
+  }
+
+  if (!any) el.innerHTML = '<div class="empty-state">No tasks match the current filter.</div>';
+}
+
+// ─────────────────────────────────────────────────────────────
+// BUILD CARD
+// ─────────────────────────────────────────────────────────────
+function buildCard(t, catKey, meta) {
+  var card = document.createElement('div');
+  card.className = 'task-card' + (t.done ? ' done' : '');
+  card.id = 'card-' + t.id;
+
+  var pc = t.prio === 'high' ? 'prio-high' : t.prio === 'low' ? 'prio-low' : 'prio-med';
+  var pl = t.prio === 'high' ? 'HIGH' : t.prio === 'low' ? 'LOW' : 'MED';
+  var typeLabel = t.type === 'hw' ? 'HW / Wiring' : t.type === 'sw' ? 'SW / Config' : t.type === 'hw-sw' ? 'HW + SW' : '';
+
+  var comments = (t.comments || []).map(function(c) {
+    return '<div class="comment-entry"><span class="comment-ts">' + xe(c.ts) + '</span><span>' + xe(c.text) + '</span></div>';
+  }).join('');
+
+  var doneStamp = (t.done && t.doneAt)
+    ? '<span style="font-size:9px;color:var(--text-dim);font-family:\'Space Mono\',monospace">✓ ' + xe(t.doneAt) + '</span>'
+    : '';
+
+  var tid = t.id;
+  card.innerHTML =
+    '<div class="task-main" onclick="cardClick(\'' + tid + '\')">' +
+      '<div class="task-checkbox">' +
+        '<svg width="11" height="11" viewBox="0 0 12 12" fill="none">' +
+          '<polyline points="1.5,6 4.5,9 10.5,3" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>' +
+      '</div>' +
+      '<div class="task-body">' +
+        '<div class="alarm-code-lbl">' + xe(t.code || t.id).toUpperCase() + '</div>' +
+        '<div class="task-title">' + xe(t.title) + '</div>' +
+        (t.hint ? '<div class="task-hint">💡 ' + xe(t.hint) + '</div>' : '') +
+        '<div class="task-meta">' +
+          '<span class="mach-tag mach-' + (t.mach||'MIP') + '">' + (t.mach||'MIP') + '</span>' +
+          '<span class="task-cat-tag" style="color:' + meta.color + ';border-color:' + meta.color + ';background:' + meta.dim + '">' + xe(catKey) + '</span>' +
+          '<span class="task-priority ' + pc + '">' + pl + '</span>' +
+          (typeLabel ? '<span class="alarm-type-tag ' + (t.type||'') + '">' + typeLabel + '</span>' : '') +
+          doneStamp +
+        '</div>' +
+      '</div>' +
+      '<div class="task-actions" onclick="event.stopPropagation()">' +
+        '<button class="icon-btn" onclick="togCP(\'' + tid + '\')" title="Notes">' +
+          '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' +
+          ((t.comments||[]).length ? '<span style="font-size:9px;color:var(--amber);margin-left:1px">' + (t.comments||[]).length + '</span>' : '') +
+        '</button>' +
+        '<button class="icon-btn del edit-only" onclick="delTask(\'' + tid + '\')" title="Delete">' +
+          '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="comment-panel" id="cp-' + tid + '">' +
+      '<div class="comment-label">Notes & Updates</div>' +
+      '<div class="comment-history" id="ch-' + tid + '">' + comments + '</div>' +
+      '<div class="comment-row edit-only">' +
+        '<textarea class="comment-input" id="ci-' + tid + '" placeholder="Add note or update…" rows="1" onkeydown="ckd(event,\'' + tid + '\')"></textarea>' +
+        '<button class="comment-save" onclick="addComment(\'' + tid + '\')">Save</button>' +
+      '</div>' +
+    '</div>';
+
+  return card;
+}
+
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
+function xe(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────────────────────
+// ACTIONS
+// ─────────────────────────────────────────────────────────────
+async function cardClick(id) {
+  if (!isEditor) return;
+  var t = null;
+  for (var i=0;i<tasks.length;i++) { if (tasks[i].id===id){ t=tasks[i]; break; } }
+  if (!t) return;
+  t.done = !t.done;
+  t.doneAt = t.done
+    ? new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+    : null;
+  await persist(); renderAll();
+  if (t.done) showToast('✓ Task marked complete');
+}
+
+function togCP(id) {
+  var p = document.getElementById('cp-' + id); if (!p) return;
+  p.classList.toggle('open');
+  if (p.classList.contains('open') && isEditor) {
+    var inp = document.getElementById('ci-' + id);
+    if (inp) setTimeout(function(){ inp.focus(); }, 50);
+  }
+}
+
+function ckd(e, id) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addComment(id); }
+}
+
+async function addComment(id) {
+  if (!isEditor) return;
+  var inp = document.getElementById('ci-' + id); if (!inp) return;
+  var text = inp.value.trim(); if (!text) return;
+  var t = null;
+  for (var i=0;i<tasks.length;i++) { if (tasks[i].id===id){ t=tasks[i]; break; } }
+  if (!t) return;
+  if (!t.comments) t.comments = [];
+  var ts = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  t.comments.push({ts:ts, text:text});
+  await persist(); inp.value = '';
+  var ch = document.getElementById('ch-' + id);
+  if (ch) {
+    var e = document.createElement('div');
+    e.className = 'comment-entry';
+    e.innerHTML = '<span class="comment-ts">' + ts + '</span><span>' + xe(text) + '</span>';
+    ch.appendChild(e); ch.scrollTop = ch.scrollHeight;
+  }
+  renderStats(); showToast('Note saved');
+}
+
+async function delTask(id) {
+  if (!isEditor) return;
+  if (!confirm('Delete this task?')) return;
+  tasks = tasks.filter(function(t){ return t.id !== id; });
+  await persist(); renderAll(); showToast('Task deleted');
+}
+
+// ─────────────────────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────────────────────
+function openModal() {
+  if (!isEditor) return;
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(function(){ document.getElementById('newTitle').focus(); }, 50);
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('newTitle').value = '';
+  document.getElementById('newNote').value = '';
+}
+function closeModalBg(e) { if (e.target.id === 'modalOverlay') closeModal(); }
+
+// ─────────────────────────────────────────────────────────────
+// AUTO-INCREMENT ID
+// ─────────────────────────────────────────────────────────────
+function nextId(cat) {
+  var prefix = {
+    ALARMS:      'A',
+    ELECTRICAL:  'E',
+    PROGRAMMING: 'P',
+    MECHANICAL:  'M',
+    PLC:         'PLC'
+  }[cat] || 'T';
+
+  // Find all existing numeric IDs for this prefix
+  var nums = tasks
+    .map(function(t) { return t.id || ''; })
+    .filter(function(id) {
+      return id.toLowerCase().startsWith(prefix.toLowerCase());
+    })
+    .map(function(id) {
+      var n = parseInt(id.replace(new RegExp('^' + prefix, 'i'), ''), 10);
+      return isNaN(n) ? 0 : n;
+    });
+
+  var max = nums.length ? Math.max.apply(null, nums) : 0;
+  return prefix + (max + 1);
+}
+
+async function addTask() {
+  if (!isEditor) return;
+  var title = document.getElementById('newTitle').value.trim();
+  if (!title) { document.getElementById('newTitle').style.borderColor = 'var(--red)'; return; }
+  document.getElementById('newTitle').style.borderColor = '';
+  var cat  = document.getElementById('newCat').value;
+  var prio = document.getElementById('newPrio').value;
+  var mach = document.getElementById('newMach').value;
+  var note = document.getElementById('newNote').value.trim();
+  var ts = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  var newId = nextId(cat);
+  var nt = {
+    id: newId, cat:cat, title:title, prio:prio, mach:mach, done:false,
+    createdAt: new Date().toISOString(),
+    comments: note ? [{ts:ts, text:note}] : []
+  };
+  tasks.push(nt); await persist(); closeModal(); renderAll(); showToast('Task added');
+  setTimeout(function(){
+    var el = document.getElementById('card-' + nt.id);
+    if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 120);
+}
+
+// ─────────────────────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────────────────────
+var _tt;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+// ─────────────────────────────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeModal(); closePin(); }
+  if ((e.metaKey||e.ctrlKey) && e.key === 'n' && isEditor) { e.preventDefault(); openModal(); }
+});
+
+// ─────────────────────────────────────────────────────────────
+// DAILY REPORT GENERATOR
+// ─────────────────────────────────────────────────────────────
+function generateDailyReport() {
+  var today = new Date();
+  var todayStr = today.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var todayShort = today.toISOString().slice(0,10);
+  var catKeys = Object.keys(CAT_META);
+  var catColors = {ALARMS:'#ef4444',ELECTRICAL:'#f59e0b',PROGRAMMING:'#3b82f6',MECHANICAL:'#10b981',PLC:'#a855f7'};
+  var catLabels = {ALARMS:'HMI Alarms',ELECTRICAL:'Electrical',PROGRAMMING:'Programming',MECHANICAL:'Mechanical',PLC:'PLC Program'};
+  var totalAll=0, doneAll=0, completedTodayCount=0, pendingHighCount=0;
+  var statRows='', completedHtml='', pendingHighHtml='', notesHtml='';
+
+  for (var ci=0; ci<catKeys.length; ci++) {
+    var ck=catKeys[ci]; var total=0, doneCnt=0;
+    for (var i=0; i<tasks.length; i++) {
+      if (tasks[i].cat===ck) { total++; if (tasks[i].done) doneCnt++; }
+    }
+    totalAll+=total; doneAll+=doneCnt;
+    var pct = total>0 ? Math.round(doneCnt/total*100) : 0;
+    statRows += '<div style="background:#111318;border:1px solid #1e2230;border-radius:8px;padding:14px 16px;text-align:center">' +
+      '<div style="font-family:Barlow Condensed,sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;color:'+catColors[ck]+';margin-bottom:4px">'+(catLabels[ck]||ck)+'</div>' +
+      '<div style="font-family:Space Mono,monospace;font-size:1.4rem;font-weight:700;color:#e2e8f0">'+doneCnt+'<span style="color:#4a5068;font-size:.85rem">/'+total+'</span></div>' +
+      '<div style="height:4px;background:#1e2230;border-radius:2px;margin-top:8px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+catColors[ck]+';border-radius:2px"></div></div></div>';
+  }
+  var totalPct = totalAll>0 ? Math.round(doneAll/totalAll*100) : 0;
+
+  for (var i=0; i<tasks.length; i++) {
+    var t=tasks[i];
+    if (t.done && t.doneAt) {
+      var dStr = (t.doneAt||'').toLowerCase();
+      var todayMon = today.toLocaleDateString('en-US',{month:'short'});
+      var todayDay = today.getDate();
+      if (dStr.indexOf(todayMon.toLowerCase()+' '+todayDay) !== -1 || (t.doneAt && t.doneAt.indexOf && t.doneAt.indexOf(todayShort)!==-1)) {
+        completedTodayCount++;
+        var cc = catColors[t.cat]||'#f59e0b';
+        var lastNote = '';
+        if (t.comments && t.comments.length>0) {
+          var lt = t.comments[t.comments.length-1].text||t.comments[t.comments.length-1].t||'';
+          if (lt) lastNote = '<div style="font-size:.8rem;color:#8892a5;margin-top:6px;padding-left:12px;border-left:2px solid #1e2230">'+esc(lt)+'</div>';
+        }
+        completedHtml += '<div style="background:#111318;border:1px solid #1e2230;border-radius:8px;padding:12px 16px;margin-bottom:8px;border-left:3px solid '+cc+'">' +
+          '<div style="display:flex;align-items:center;gap:10px"><span style="font-family:Space Mono,monospace;font-size:.8rem;font-weight:700;color:#10b981">\u2713 '+esc(t.id.toUpperCase())+'</span>' +
+          '<span style="font-size:.9rem;color:#e2e8f0">'+esc(t.title)+'</span></div>'+lastNote+'</div>';
+      }
+    }
+    if (!t.done && t.prio==='high') {
+      pendingHighCount++;
+      var cc2 = catColors[t.cat]||'#f59e0b';
+      pendingHighHtml += '<div style="background:#111318;border:1px solid #1e2230;border-radius:8px;padding:10px 16px;margin-bottom:6px;display:flex;align-items:center;gap:10px;border-left:3px solid '+cc2+'">' +
+        '<span style="font-family:Space Mono,monospace;font-size:.75rem;font-weight:700;color:#f59e0b">'+esc(t.id.toUpperCase())+'</span>' +
+        '<span style="font-size:.85rem;color:#e2e8f0;flex:1">'+esc(t.title)+'</span>' +
+        '<span style="font-family:Barlow Condensed,sans-serif;font-size:.65rem;text-transform:uppercase;letter-spacing:1px;padding:2px 6px;border-radius:3px;background:#ef4444;color:#000;font-weight:700">HIGH</span></div>';
+    }
+  }
+  if (!completedHtml) completedHtml = '<div style="color:#4a5068;text-align:center;padding:20px;font-size:.9rem">No tasks completed today</div>';
+  if (!pendingHighHtml) pendingHighHtml = '<div style="color:#10b981;text-align:center;padding:20px;font-size:.9rem">All high-priority tasks completed!</div>';
+
+  var todayNotes = [];
+  for (var i=0; i<tasks.length; i++) {
+    var t=tasks[i]; if (!t.comments) continue;
+    for (var j=0; j<t.comments.length; j++) {
+      var c=t.comments[j]; var ts=c.ts||c.time||'';
+      var todayMon2 = today.toLocaleDateString('en-US',{month:'short'});
+      var todayDay2 = today.getDate();
+      if (ts.toLowerCase().indexOf(todayMon2.toLowerCase()+' '+todayDay2)!==-1 || ts.indexOf(todayShort)!==-1) {
+        todayNotes.push({id:t.id,text:c.text||c.t||'',time:ts});
+      }
+    }
+  }
+  if (todayNotes.length>0) {
+    for (var n=0; n<todayNotes.length; n++) {
+      notesHtml += '<div style="background:#111318;border:1px solid #1e2230;border-radius:6px;padding:10px 14px;margin-bottom:6px">' +
+        '<span style="font-family:Space Mono,monospace;font-size:.7rem;color:#f59e0b">'+esc(todayNotes[n].id.toUpperCase())+'</span> ' +
+        '<span style="font-family:Space Mono,monospace;font-size:.65rem;color:#4a5068">'+esc(todayNotes[n].time)+'</span>' +
+        '<div style="font-size:.82rem;color:#8892a5;margin-top:4px">'+esc(todayNotes[n].text)+'</div></div>';
+    }
+  } else { notesHtml = '<div style="color:#4a5068;text-align:center;padding:16px;font-size:.85rem">No field notes recorded today</div>'; }
+
+  var pendingTotal = totalAll - doneAll;
+  var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
+    '<title>Daily Report - V0653 - '+todayShort+'</title>' +
+    '<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#0a0c0f;color:#e2e8f0;font-family:Barlow,sans-serif;padding:0;min-height:100vh}</style></head><body>' +
+    '<div style="max-width:800px;margin:0 auto;padding:24px 20px">' +
+    '<div style="background:linear-gradient(135deg,#0d0f14,#131620);border:1px solid #1e2230;border-radius:12px;padding:24px;margin-bottom:20px">' +
+    '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
+    '<span style="font-family:Space Mono,monospace;font-size:1rem;font-weight:700;background:#f59e0b;color:#000;padding:4px 12px;border-radius:4px;letter-spacing:1px">V0653</span>' +
+    '<div><div style="font-family:Barlow Condensed,sans-serif;font-size:1.2rem;font-weight:600;text-transform:uppercase;letter-spacing:2px">Daily Commissioning Report</div>' +
+    '<div style="font-family:Barlow Condensed,sans-serif;font-size:.8rem;color:#8892a5;text-transform:uppercase;letter-spacing:1px;margin-top:2px">COMECER INC \u00b7 MIP-1100 &amp; BBS</div></div>' +
+    '<div style="margin-left:auto;text-align:right"><div style="font-family:Space Mono,monospace;font-size:.85rem;color:#f59e0b">'+todayStr+'</div>' +
+    '<div style="font-family:Space Mono,monospace;font-size:.7rem;color:#4a5068;margin-top:2px">Generated '+today.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})+'</div></div></div>' +
+    '<div style="margin-top:18px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+    '<span style="font-family:Barlow Condensed,sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:1.5px;color:#8892a5">Overall Progress</span>' +
+    '<span style="font-family:Space Mono,monospace;font-size:.9rem;font-weight:700;color:#f59e0b">'+doneAll+'/'+totalAll+' ('+totalPct+'%)</span></div>' +
+    '<div style="height:8px;background:#1e2230;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+totalPct+'%;background:linear-gradient(90deg,#f59e0b,#10b981);border-radius:4px"></div></div></div></div>' +
+    '<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">' +
+    '<div style="flex:1;min-width:120px;background:#111318;border:1px solid #1e2230;border-radius:8px;padding:14px;text-align:center"><div style="font-family:Space Mono,monospace;font-size:1.6rem;font-weight:700;color:#10b981">'+completedTodayCount+'</div><div style="font-family:Barlow Condensed,sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:#8892a5;margin-top:2px">Done Today</div></div>' +
+    '<div style="flex:1;min-width:120px;background:#111318;border:1px solid #1e2230;border-radius:8px;padding:14px;text-align:center"><div style="font-family:Space Mono,monospace;font-size:1.6rem;font-weight:700;color:#ef4444">'+pendingHighCount+'</div><div style="font-family:Barlow Condensed,sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:#8892a5;margin-top:2px">Pending HIGH</div></div>' +
+    '<div style="flex:1;min-width:120px;background:#111318;border:1px solid #1e2230;border-radius:8px;padding:14px;text-align:center"><div style="font-family:Space Mono,monospace;font-size:1.6rem;font-weight:700;color:#f59e0b">'+pendingTotal+'</div><div style="font-family:Barlow Condensed,sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:#8892a5;margin-top:2px">Total Pending</div></div></div>' +
+    '<div style="font-family:Barlow Condensed,sans-serif;font-size:.9rem;text-transform:uppercase;letter-spacing:2px;color:#f59e0b;margin-bottom:10px">Category Breakdown</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px">'+statRows+'</div>' +
+    '<div style="font-family:Barlow Condensed,sans-serif;font-size:.9rem;text-transform:uppercase;letter-spacing:2px;color:#10b981;margin-bottom:10px">\u2713 Completed Today</div>'+completedHtml+
+    '<div style="font-family:Barlow Condensed,sans-serif;font-size:.9rem;text-transform:uppercase;letter-spacing:2px;color:#3b82f6;margin:20px 0 10px">Field Notes</div>'+notesHtml+
+    '<div style="font-family:Barlow Condensed,sans-serif;font-size:.9rem;text-transform:uppercase;letter-spacing:2px;color:#ef4444;margin:20px 0 10px">Pending High Priority ('+pendingHighCount+')</div>'+pendingHighHtml+
+    '<div style="margin-top:30px;padding-top:16px;border-top:1px solid #1e2230;text-align:center">' +
+    '<div style="font-family:Barlow Condensed,sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:#4a5068">V0653 Commissioning Tracker \u00b7 COMECER INC \u00b7 MIP-1100 &amp; BBS</div>' +
+    '<div style="font-family:Space Mono,monospace;font-size:.65rem;color:#4a5068;margin-top:4px">Report generated: '+today.toISOString()+'</div></div></div></body></html>';
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'V0653_Daily_Report_'+todayShort+'.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Daily report downloaded!','success');
+}
+
+function esc(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
+// ─────────────────────────────────────────────────────────────
+// BOOT — synchronous, tasks show immediately
+// ─────────────────────────────────────────────────────────────
+boot();
+updateLockBtn();
+</script>
+</body>
+</html>
