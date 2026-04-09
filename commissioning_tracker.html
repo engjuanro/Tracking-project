@@ -236,7 +236,7 @@ body:not(.view-mode) .lock-btn{
       <div class="stat-bar"><div class="stat-fill" id="fill-e" style="width:0%"></div></div>
     </div>
     <div class="stat-card" style="--cc:var(--blue)"   onclick="filterCat('PROGRAMMING')">
-      <div class="stat-label">💻 Programming</div>
+      <div class="stat-label">💻 HMI Programming</div>
       <div class="stat-count" id="stat-p">0 <span>/ 0</span></div>
       <div class="stat-bar"><div class="stat-fill" id="fill-p" style="width:0%"></div></div>
     </div>
@@ -290,7 +290,7 @@ body:not(.view-mode) .lock-btn{
         <select class="form-select" id="newCat">
           <option value="ALARMS">🚨 HMI Alarms</option>
           <option value="ELECTRICAL">⚡ Electrical</option>
-          <option value="PROGRAMMING">💻 Programming</option>
+          <option value="PROGRAMMING">💻 HMI Programming</option>
           <option value="MECHANICAL">🔧 Mechanical</option>
           <option value="PLC">🔲 PLC Program</option>
           <option value="DOCUMENTATION">📋 Documentation</option>
@@ -333,7 +333,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v144';
+var LS_KEY = 'comecer-v0653-tasks-v159';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -372,7 +372,7 @@ function getDefaults() {
      code:'A076',type:'sw',
      title:'A076 — ROOM COMMUNICATION ALARM',
      hint:'DONE. Fixed via plc22 — FC91 Nw44 Optional_29 polarity mismatch. A076 cleared.'},
-    {id:'a05',cat:'ALARMS',prio:'high',done:false,comments:[{ts:'Mar 23, 07:45 PM',text:'Appeared cleared when LAF fans were off.'},{ts:'Mar 23, 10:30 PM',text:'Alarm returned after LAF fans powered on — was not actually resolved. LAF filter still clogged/missing. Reinstated as pending.'}],
+    {id:'a05',cat:'ALARMS',prio:'high',done:false,comments:[{ts:'Mar 23, 07:45 PM',text:'Appeared cleared when LAF fans were off.'},{ts:'Mar 23, 10:30 PM',text:'Alarm returned after LAF fans powered on — was not actually resolved. LAF filter still clogged/missing. Reinstated as pending.'},{ts:'Apr 8, 04:00 AM',text:'LAF HEPA filter NOW INSTALLED. But filter COVER is missing — must be fabricated (see m25). Verify if A077 clears with filter in place. DP sensor reading should normalize once airflow is established through filter.'}],
      code:'A077',type:'hw',
      title:'RIGHT LAF FILTER CLOGGED',
      hint:'LAF DP sensor indicating clogged HEPA. Install LAF filter first (mechanical task), then reset DP setpoint. Note: alarm only appears when LAF fans are running.'},
@@ -474,9 +474,9 @@ function getDefaults() {
      title:'Diagnose and fix multiple IO cards showing RED fault on PLC'},
     {id:'e3',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 28, 08:30 PM',text:'Pneumatic panel power restored. Panel operational.'}],
      title:'Restore power to pneumatic panel — currently no power present'},
-    {id:'e4',cat:'ELECTRICAL',prio:'high',done:false,comments:[],
+    {id:'e4',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 7, 10:00 AM',comments:[{ts:'Apr 7, 10:00 AM',text:'DONE — Cable between Geiger unit and probe replaced. Connector on probe end was damaged. Cable assembly replaced and signal restored. Verified in HMI.'}],
      title:'Geiger counter — replace cable between Geiger unit and probe (connector on probe end is damaged)',
-     hint:'Problem is at the probe connector — the cable between the Geiger counter and the probe needs to be replaced. The connector at the probe end is faulty/damaged. Replace the cable assembly and verify signal restores in HMI after reconnection.'},
+     hint:'DONE. Cable replaced. Probe connector was faulty/damaged. Signal restored in HMI after reconnection.'},
     {id:'e5',cat:'ELECTRICAL',prio:'low',done:true,
      doneAt:'Mar 21, 01:00 PM',
      comments:[{ts:'Mar 21, 01:00 PM',text:'Geiger connection configuration corrected in PLC/HMI. Communication established. Pending item: replace physical cable and probe (task E4).'}],
@@ -561,10 +561,12 @@ function getDefaults() {
     {id:'p5',cat:'PROGRAMMING',prio:'med',done:true,doneAt:'Mar 25, 06:30 PM',comments:[{ts:'Mar 25, 03:00 PM',text:'Prechamber extraction fan motor already replaced (120 VAC — see e23).'},{ts:'Mar 25, 06:30 PM',text:'VFD Pre-Chamber Extraction Fan programmed and running. Exhaust physically tested — outputs OK, VFD running fan correctly. PENDING: PLC logic (triggers FC56, interlocks FC90, alarms FC91) and HMI screens — see plc17.'}],
      title:'Program VFD Pre-Chamber Extraction Fan',
      hint:'DONE. VFD programmed, exhaust running. Missing PLC logic and HMI (plc17).'},
-    {id:'p6',cat:'PROGRAMMING',prio:'med',done:false,comments:[{ts:'Mar 23, 11:15 PM',text:'Drawing System and Calibration screens not applicable to this machine configuration. Remove from HMI program to avoid confusion during operation.'},{ts:'Mar 27, 12:30 AM',text:'Confirmed: Drawing System screen must be removed from HMI navigation. This machine does not have the Drawing System option — screen should not be accessible to operators. Task scheduled for HMI programming phase (remote work during Mar 30 – Apr 5 or on-site after Apr 6). Open HMI project in TIA Portal WinCC, delete or hide the Drawing System screen and remove navigation button/link from main menu.'}],
-     title:'Remove Drawing System screen from HMI program — not applicable to this machine'},
-    {id:'p7',cat:'PROGRAMMING',prio:'med',done:false,comments:[{ts:'Mar 23, 11:15 PM',text:'Calibration screen not applicable to this machine. Remove from HMI program.'},{ts:'Mar 27, 12:30 AM',text:'Same as p6 — Calibration screen must be removed from HMI. Not applicable to this configuration. Remove screen and navigation button from HMI project.'}],
-     title:'Remove Calibration screen from HMI program — not applicable to this machine'},
+    {id:'p6',cat:'PROGRAMMING',prio:'med',done:true,doneAt:'Apr 7, 04:15 PM',comments:[{ts:'Mar 23, 11:15 PM',text:'Drawing System and Calibration screens not applicable to this machine configuration. Remove from HMI program to avoid confusion during operation.'},{ts:'Mar 27, 12:30 AM',text:'Confirmed: Drawing System screen must be removed from HMI navigation. This machine does not have the Drawing System option — screen should not be accessible to operators.'},{ts:'Apr 7, 04:15 PM',text:'DONE. Drawing System button/access removed from 03_MAIN screen in HMI project.'}],
+     title:'Remove Drawing System screen from HMI program — not applicable to this machine',
+     hint:'DONE. Drawing System access removed from 03_MAIN HMI screen.'},
+    {id:'p7',cat:'PROGRAMMING',prio:'med',done:true,doneAt:'Apr 8, 04:10 AM',comments:[{ts:'Mar 23, 11:15 PM',text:'Calibration screen not applicable to this machine. Remove from HMI program.'},{ts:'Mar 27, 12:30 AM',text:'Same as p6 — Calibration screen must be removed from HMI. Not applicable to this configuration. Remove screen and navigation button from HMI project.'},{ts:'Apr 8, 04:10 AM',text:'DONE. Calibration screen removed from HMI project.'}],
+     title:'Remove Calibration screen from HMI program — not applicable to this machine',
+     hint:'DONE. Calibration screen and navigation button removed from HMI project.'},
     {id:'p8',cat:'PROGRAMMING',prio:'med',done:true,doneAt:'Mar 28, 09:30 PM',comments:[{ts:'Mar 28, 09:30 PM',text:'HMI SETUP Page 86 — Current config (✓=ON, ✗=OFF): Solid Waste ✗ | ELD port ✓ | Pre-chamber ✓ | ITD port ✓ | Audit Trail ✗ | Check Location Teleclamp ✗ | Automatic Leak Test ✗ | Front Door Motorized ✓ | Front Door Manual ✗ | Rear Door Motorized ✗ | Rear Door Manual ✗ | Pre-chamber tray ✓ | LAF ✓ | Autoclave ✗ | ACS Delay Line ✗ | Temperature Probe and Humidity ✗ | Pull-out tray ✓ | Air In and OUT Valves ✗. HMI SETUP Page 87 — Current config: Photocells outside ITD Footprint ✗ | External Door Solid Waste ✗ | Crimping De-Crimping ✗ | Lower technical compartment ✓ | Electrical connection Filter clogging N.CLOSE | Shielded Door Pre-chamber ✓ | Ch. Slave LEFT [1] Ch. Slave RIGHT [0] | Door Open Bypass Front with Radiaz. ✗ | Discharge Clamp DWS ✓ | Check Maintenance Sliding Door ✓ | AVC BOX 1 ✗ | PLC pre-chamber Integrated ✓ | OVERVOLTAGE UNLOADER ✗ | ELD Prechamber ✓ | VPHP ✓ | VPHP LC Sensor ✗ | Particle Counter Pre-chamber ✗ | Particle Counter Main Bedroom ✗ | Temperature Probe and Pre-Chamber Hum ✓ | Geiger Pre-chamber ✗.'}],
      title:'HMI SETUP configuration — Pages 86-87 documented (DB72 Optional flags)',
      hint:'DONE. All HMI SETUP options documented as of Mar 28. Key enabled: ELD port, Pre-chamber, ITD port, Front Door Motorized, Pre-chamber tray, LAF, Pull-out tray, Shielded Door Pre-chamber, PLC pre-chamber Integrated, ELD Prechamber, VPHP, Temp Probe Pre-Chamber.'},
@@ -579,19 +581,19 @@ function getDefaults() {
     {id:'m4',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 25, 08:00 AM',comments:[{ts:'Mar 25, 08:00 AM',text:'Upstream and downstream fittings connected for filter integrity test. Tubing connected at front testing plate. Ready for HEPA filter integrity testing.'}],
      title:'Connect downstream & upstream air fittings — 2 holes in plate + canister (tubing ready)',
      hint:'DONE. Fittings connected upstream/downstream of integrity test filter and at front testing plate.'},
-    {id:'m5',cat:'MECHANICAL',prio:'med',done:false,comments:[],
+    {id:'m5',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Apr 07, 2026',text:'Door cylinder position sensors adjusted. Setpoints configured.'}],
      title:'Adjust setpoints on door cylinder position sensors'},
-    {id:'m6',cat:'MECHANICAL',prio:'med',done:false,comments:[],
+    {id:'m6',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Apr 8, 2026',comments:[{ts:'Apr 8, 2026',text:'Main Chamber interior installed: floor, cover, ceiling, and lights. Done.'}],
      title:'Install Main Chamber interior: floor, cover, ceiling and lights'},
     {id:'e27',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Mar 26, 09:30 PM',text:'E4.2 (N9023) has JUMPER installed — SP9123 (LAF Obstruction Second Filter differential pressure sensor) NOT present on equipment. Jumper allows LAF operation without sensor.'},{ts:'Apr 07, 2026',text:'DONE. E4.2 cable 91203 connected to 24L03 permanently. This application does NOT have LAF obstruction secondary filter — SP9123 sensor not applicable. Input kept HIGH (24V) via 24L03 rail. Documented as permanent bypass.'}],
      title:'E4.2 — cable 91203 to 24L03 (no LAF obstruction secondary filter in this application)',
      hint:'DONE. E4.2 cable 91203 to 24L03 permanent. No SP9123 sensor — not applicable to this config.'},
-    {id:'m7',cat:'MECHANICAL',prio:'high',done:false,comments:[],
+    {id:'m7',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 8, 2026',comments:[{ts:'Apr 8, 2026',text:'LAF HEPA filter installed in Main Chamber. Done. Note: filter COVER still pending — see m25.'}],
      title:'Install Main Chamber LAF HEPA filter'},
     {id:'m8',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 23, 11:45 PM',comments:[{ts:'Mar 23, 11:45 PM',text:'Waste/drawing system cover installed.'}],
      title:'Install solid waste / drawing system cover panel'},
-    {id:'m9',cat:'MECHANICAL',prio:'low',done:false,comments:[],
-     title:'Reinstall inlet filter cover'},
+    {id:'m9',cat:'MECHANICAL',prio:'med',done:false,comments:[{ts:'Mar 27, 04:30 AM',text:'Changed from inlet filter cover to Pre-Chamber filter reinstallation.'}],
+     title:'Reinstall filter Pre-Chamber'},
     {id:'m10',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 23, 11:30 PM',mach:'BBS',comments:[{ts:'Mar 23, 11:30 PM',text:'Door cover installed on right technical space.'}],
      title:'BBS: install cover on right technical space door'},
     {id:'m20',cat:'MECHANICAL',prio:'med',done:false,mach:'BBS',comments:[{ts:'Mar 23, 11:30 PM',text:'Apply silicone caulk on BBS door cover to seal properly.'}],
@@ -601,9 +603,12 @@ function getDefaults() {
     {id:'m22',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Mar 25, 11:00 AM',comments:[{ts:'Mar 25, 10:30 AM',text:'Festo VUVG-L18-T32C-MZT-G14-1P3: valve not switching even though solenoid LED is on. Root cause: no pneumatic pilot air connected to port 12/14 (M5). Without pilot pressure (2-6 bar) valve cannot change state internally. ACTION: connect pilot air to port 12 or 14 (M5) with min. 2-6 bar.'},{ts:'Mar 25, 11:00 AM',text:'RESOLVED. Pilot air connected. Test performed: removed main air and power — ELD maintained 3 bar pressure on gasket. Valve holds pressure correctly without power. Verification OK.'}],
      title:'Festo VUVG-L18 — connect pneumatic pilot air port 12/14 (M5) — valve not switching',
      hint:'DONE. Pilot air connected. Retention test: with main air and power OFF, ELD gasket maintained 3 bar. Festo VUVG-L18-T32C-MZT-G14-1P3 valve operating correctly.'},
-    {id:'m23',cat:'MECHANICAL',prio:'high',done:false,comments:[{ts:'Mar 27, 01:00 AM',text:'A5151 Pre-Chamber Exhaust Fan: Phoenix PWM VFD control is now fully working — speed reference responds correctly from PLC/HMI (S2 DIP switch corrected, S1 verified OK, PAW270 analog output operational). HOWEVER, the fan currently installed is NOT the correct fan for this application. The original fan was installed incorrectly from the factory or during previous work — wrong model/type for the Pre-Chamber exhaust requirements. Fan must be mechanically replaced with the correct model matching the application specs. Coordinate with Comecer engineering to confirm correct fan model and source replacement. Electrical and software side (A5151 VFD, cables, PLC logic) are all functional — only mechanical fan swap is pending.'}],
-     title:'Pre-Chamber Exhaust Fan — replace incorrect fan with correct model for application (A5151)',
-     hint:'A5151 VFD PWM control WORKING. Wrong fan installed — not correct for this application. Replace fan mechanically. Coordinate with Comecer for correct model. Electrical/software functional.'},
+    {id:'m23',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 9, 04:00 PM',comments:[{ts:'Mar 27, 01:00 AM',text:'A5151 Pre-Chamber Exhaust Fan: Phoenix PWM VFD control is now fully working — speed reference responds correctly from PLC/HMI (S2 DIP switch corrected, S1 verified OK, PAW270 analog output operational). HOWEVER, the fan currently installed is NOT the correct fan for this application.'},{ts:'Apr 7, 10:00 AM',text:'Correct fan obtained. Remaining: mount fan on motor bracket. Once bracket mounting is complete, task is done.'},{ts:'Apr 9, 04:00 PM',text:'DONE. Correct fan mounted on motor bracket. A5151 VFD PWM control was already working. Pre-Chamber Exhaust Fan fully operational.'}],
+     title:'Pre-Chamber Exhaust Fan — mount correct fan on motor bracket (A5151)',
+     hint:'DONE. Correct fan mounted. A5151 VFD PWM control working. Electrical/software functional.'},
+    {id:'m25',cat:'MECHANICAL',prio:'high',done:false,comments:[{ts:'Apr 8, 04:00 AM',text:'LAF HEPA filter installed. But the filter COVER is missing — needs to be custom fabricated. Cannot run LAF at full capacity without cover. Coordinate fabrication with Comecer or local shop.'}],
+     title:'LAF HEPA Filter Cover — fabricate and install',
+     hint:'LAF filter installed but cover is missing. Cover must be fabricated (custom part). Coordinate with Comecer engineering or local fabrication shop. Required before LAF commissioning can be completed.'},
     {id:'m24',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 27, 08:00 AM',comments:[{ts:'Mar 27, 08:00 AM',text:'Installed flow restrictors (speed reducers) on ITD pneumatic cylinders to prevent the door from slamming. Door now opens and closes smoothly without hard impact. Mechanical adjustment complete — no PLC changes needed.'}],
      title:'ITD door pneumatic cylinders — install flow restrictors to reduce door slam',
      hint:'DONE. Flow restrictors installed on ITD cylinder ports. Door movement is now smooth and controlled — no hard impact on open/close.'},
@@ -612,23 +617,27 @@ function getDefaults() {
     {id:'m12',cat:'MECHANICAL',prio:'low',done:false,comments:[],
      title:'MIP — clean cables in wireway'},
     {id:'m13',cat:'MECHANICAL',prio:'low',done:false,comments:[],
-     title:'Apply silicone sealant (caulking)'},
-    {id:'m14',cat:'MECHANICAL',prio:'med',done:false,comments:[],
+     mach:'MIP',
+     title:'MIP — Apply silicone sealant (caulking)'},
+    {id:'m14',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Apr 8, 2026',comments:[{ts:'Apr 8, 2026',text:'HMI panel mounted on wall. Done.'}],
      title:'Mount HMI panel on wall'},
     {id:'m15',cat:'MECHANICAL',prio:'med',done:false,comments:[],
      title:'Fabricate and install main gasket MIP'},
-    {id:'m16',cat:'MECHANICAL',prio:'high',done:false,comments:[],
+    {id:'m16',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 7',comments:[{ts:'Apr 7',text:'SP9032 sensor setpoint reviewed and adjusted. Done.'}],
      title:'Review and adjust setpoint SP9032',
-     hint:'Verify SP9032 sensor setpoint matches process requirements — confirm correct value before first run.'},
+     hint:'DONE. SP9032 sensor setpoint verified and adjusted to match process requirements.'},
     {id:'m18',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 7, 04:00 AM',comments:[{ts:'Apr 7, 04:00 AM',text:'DONE. Duplicate of e13. Ground wiring corrected, setpoints configured.'}],
      title:'SP9041, SP9161, SP9072 (gasket sensors) — rewire: wrong/ground wiring + configure setpoints Max 3.5 bar / Min 2.5 bar',
      hint:'DONE. Duplicate of e13. See e13 for details.'},
-    {id:'m17',cat:'MECHANICAL',prio:'high',done:false,comments:[],
+    {id:'m17',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 9, 04:00 PM',comments:[{ts:'Apr 9, 04:00 PM',text:'DONE. Metal target bracket fabricated and installed on lateral door frame. Inductive sensor now detects DOOR CLOSED position correctly.'}],
      title:'Lateral door — fabricate and install metal target bracket for inductive sensor',
-     hint:'Sensor is mounted, cables are in place. The original metal bracket/target plate that the inductive sensor reads to detect DOOR CLOSED is missing — old one was removed/lost. Fabricate a new steel bracket and mount on door frame so sensor can detect closed position. Required for A008 door security interlock to clear.'},
+     hint:'DONE. Steel bracket fabricated and mounted on door frame. Inductive sensor reads closed position. A008 door security interlock dependency resolved.'},
     {id:'m19',cat:'MECHANICAL',prio:'high',done:false,mach:'BBS',comments:[],
      title:'BBS: check and seal lateral door compartment plug — required for pressure test, particle counter, SAT and FAT',
      hint:'Verify the plug/cap on the BBS lateral door compartment is properly installed and sealed. Machine cannot pass pressure integrity test, particle counter test, SAT or FAT until this compartment is confirmed airtight. Inspect gasket condition on plug, confirm no leaks, and document result before scheduling SAT/FAT.'},
+    {id:'m26',cat:'MECHANICAL',prio:'med',done:false,comments:[{ts:'Apr 08, 2026',text:'Apply identification labels to all mechanical and electrical components. Required for maintenance traceability, SAT/FAT documentation, and future service reference.'}],
+     title:'Apply identification labels — mechanical components and electrical panels/wiring',
+     hint:'Label all mechanical components (solenoid valves, pneumatic fittings, cylinders, sensors) and electrical components (terminal blocks, cable runs, junction boxes, VFDs, relays). Required for SAT/FAT compliance and maintenance documentation.'},
 
     // ── PLC ─────────────────────────────────────────────────────
     {id:'plc1',cat:'PLC',prio:'high',done:false,comments:[],
@@ -692,6 +701,17 @@ function getDefaults() {
     {id:'e33',cat:'ELECTRICAL',prio:'medium',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Apr 02, 11:30 PM',text:'On-site double verification of PAW270 analog output on N9022 (Page 911). PAW270 channels 1M and 1 drive Speed Reference Pre-Chamber Air Extraction Fan via cable A5151W (2x2xAWG22 Sh, 3m). Analog signals: 0-10V cable 91104 (channel 1M) and 0-10V cable 91103 (channel 1). Shields SH9111/SH9112 → 046.2.'},{ts:'Apr 07, 2026',text:'CONFIRMED: PAW270 1M and 1 verified against schematic Page 911. Channel assignment and cable numbers match. Speed reference working correctly.'}],
      title:'Verify PAW270 (Pre-Chamber Extraction) and PAW268 (Main Extraction) channel/cable numbers — N9022 Page 911',
      hint:'DONE. PAW270 1M/1 confirmed matching schematic. Speed reference working.'},
+    {id:'e35',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Apr 09, 2026',text:'Connect ITD door motor to VFD (A1301 / KM1301 per schematic Page 917). Test door operation: verify door goes UP and DOWN in correct direction. If rotation is wrong, swap L1/L2/L3 motor cables at VFD output. After direction confirmed: remove E6.0 and E6.7 jumpers from 24L03 (see e31) and connect actual VFD Ready and Brake Release signals. Note: e31 previously had these jumpered because motor was pneumatic — now switching to electric motor with VFD.'}],
+     title:'Connect ITD door motor to VFD A1301 — test direction, swap L1/L2/L3 if needed',
+     hint:'Connect motor, test up/down direction. If wrong direction swap L1/L2/L3 at VFD output. Then reconnect E6.0 (Inverter Ready) and E6.7 (Brake Release) from VFD instead of 24L03 jumper.'},
+    {id:'e36',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Apr 09, 2026',text:'Front door shield motor not yet connected to VFD A1201. VFD already programmed (a01 done). Steps: 1) Connect motor power cables to A1201 output. 2) Test door operation — verify door goes UP and DOWN in correct direction from HMI. 3) If rotation is wrong, swap any two of L1/L2/L3 motor cables at VFD output to reverse direction. 4) Verify E0.0 (inverter ready from A1201) goes ON after connection. 5) Verify E2.0 (N9021 ready signal from A1201) also reads correctly. Related: m27 for mechanical sensor verification.'}],
+     title:'Connect front door shield motor to VFD A1201 — test direction, swap L1/L2/L3 if wrong',
+     hint:'VFD A1201 already programmed. Connect motor, test UP/DOWN direction from HMI. If wrong rotation swap L1/L2/L3 at VFD output. Verify E0.0 and E2.0 inverter ready signals after connection.'},
+
+    {id:'m27',cat:'MECHANICAL',prio:'high',done:false,comments:[{ts:'Apr 09, 2026',text:'Main door shield (front door) — verify sensor positions and mechanical system. Check N9020 DI: E0.0 (inverter portello/door ready), E0.1 (door open limit switch SQ9011), E0.2 (door close limit switch SQ9012), E0.3 (plexiglass presence BF9013), E0.4 (door in position OK), E0.5 (gasket pressure switch SP9011). Check N9020 DO: A0.0 (open door command), A0.1 (close door command), A0.2 (inflate gasket), A0.3 (deflate gasket). N9021 DI: E2.0 (ready shielded front door inverter A1201). Grease all moving parts (rails, rollers, brake mechanism) — recommended but outside commissioning scope. Coordinate with Comecer mechanical team.'},{ts:'Apr 09, 2026',text:'Verify all limit switches (SQ9011 open, SQ9012 close) are in correct mechanical position and activate at the right door travel points. Check plexiglass presence sensor BF9013 alignment. Check gasket pressure switch SP9011. Recommendation: grease rails, rollers, and brake mechanism for smooth operation — but this is outside commissioning scope, coordinate with Comecer mechanical team or client maintenance.'}],
+     title:'Front door shield — verify sensor positions, mechanical system, and limit switches (grease recommended but out of scope)',
+     hint:'Verify SQ9011 (open), SQ9012 (close), BF9013 (plexiglass), SP9011 (gasket pressure) positions. Check mechanical travel, brake mechanism. Grease rails/rollers recommended but outside commissioning scope.'},
+
     // ── DOCUMENTATION ────────────────────────────────────────────
 
     // 1.2 Use and Maintenance Manual
@@ -780,18 +800,18 @@ function getDefaults() {
     {id:'e20',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 7, 04:00 AM',comments:[{ts:'Mar 23, 08:30 PM',text:'Physical cable modifications required per red-line schematic Page 907. Reroute cables at node 90710/90711 to match new logic.'},{ts:'Apr 7, 04:00 AM',text:'DONE. Physical cable modifications completed per red-line schematic N9021 Page 907.'}],
      title:'Modify physical cables per red-line schematic N9021 Page 907 — reroute wiring for new logic',
      hint:'DONE. Cable rerouting at node 90710/90711 completed per red-line schematic for new input logic on N9021 module.'},
-    {id:'e22',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Mar 25, 11:30 AM',text:'FG0511 (Pre-Chamber Extraction Fan filter): VN cable is black and incorrect AWG. Must be WHITE AWG10 per schematic (VL1=BK AWG10, VL2=BK AWG10, VN=WH AWG10). Change VN cable from black to white AWG10. Same correction on QF5151 (2A breaker Pre-Chamber Air Extraction Fan): VN cable connected black — change to white AWG10 to match schematic. PE0511 AWG12 GNYE maintain minimum distance to Ground Bar.'},{ts:'Mar 26, 11:45 PM',text:'Ref schematic Page 515 (Pre-Chamber Air Extraction Fan). ADDITIONAL ISSUES FOUND: (1) QU5151 (fuse upstream of A5151 VFD, Phoenix Contact 2864082) has NO FUSE installed — empty fuse holder. Must install fuse before commissioning Pre-Chamber Exhaust at full power. (2) Cable 51502 (AWG18 BU from A5151 output to KA9097 circuit) had incorrect values — CORRECTED. (3) Cable 91103 (from QU5151 to A5151 input) had incorrect values — CORRECTED. VN cable changes (e22 original scope) also done. REMAINING: install fuse in QU5151.'},{ts:'Apr 7, 10:00 AM',text:'STILL PENDING: White 10AWG VN cables for FG0511, QF5151, QU5151 not yet installed. Must run white 10AWG cables to complete VN correction per schematic Page 515.'},{ts:'Apr 7, 11:00 AM',text:'QU5151 fuse PURCHASED and INSTALLED. Fuse holder no longer empty. REMAINING: only VN white 10AWG cable changes on FG0511, QF5151, QU5151.'}],
+    {id:'e22',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 9, 04:00 PM',comments:[{ts:'Mar 25, 11:30 AM',text:'FG0511 (Pre-Chamber Extraction Fan filter): VN cable is black and incorrect AWG. Must be WHITE AWG10 per schematic (VL1=BK AWG10, VL2=BK AWG10, VN=WH AWG10). Change VN cable from black to white AWG10. Same correction on QF5151 (2A breaker Pre-Chamber Air Extraction Fan): VN cable connected black — change to white AWG10 to match schematic. PE0511 AWG12 GNYE maintain minimum distance to Ground Bar.'},{ts:'Mar 26, 11:45 PM',text:'Ref schematic Page 515 (Pre-Chamber Air Extraction Fan). ADDITIONAL ISSUES FOUND: (1) QU5151 (fuse upstream of A5151 VFD, Phoenix Contact 2864082) has NO FUSE installed — empty fuse holder. Must install fuse before commissioning Pre-Chamber Exhaust at full power. (2) Cable 51502 (AWG18 BU from A5151 output to KA9097 circuit) had incorrect values — CORRECTED. (3) Cable 91103 (from QU5151 to A5151 input) had incorrect values — CORRECTED. VN cable changes (e22 original scope) also done. REMAINING: install fuse in QU5151.'},{ts:'Apr 7, 10:00 AM',text:'STILL PENDING: White 10AWG VN cables for FG0511, QF5151, QU5151 not yet installed. Must run white 10AWG cables to complete VN correction per schematic Page 515.'},{ts:'Apr 7, 11:00 AM',text:'QU5151 fuse PURCHASED and INSTALLED. Fuse holder no longer empty. REMAINING: only VN white 10AWG cable changes on FG0511, QF5151, QU5151.'},{ts:'Apr 9, 04:00 PM',text:'ALL DONE. VN white 10AWG cables installed on FG0511, QF5151, QU5151. QU5151 fuse already installed. Cables 51502 and 91103 previously corrected. Task complete.'}],
      title:'FG0511 + QF5151 + QU5151 — VN white cables (Pre-Chamber Extraction Fan)',
-     hint:'QU5151 fuse INSTALLED. REMAINING: Install WHITE 10AWG VN cables on FG0511, QF5151, QU5151 per schematic Page 515. Cables 51502 and 91103 already corrected.'},
+     hint:'DONE. All VN white 10AWG cables installed on FG0511, QF5151, QU5151 per schematic Page 515. QU5151 fuse installed. Cables 51502 and 91103 corrected.'},
     {id:'e23',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 25, 12:00 PM',comments:[{ts:'Mar 25, 12:00 PM',text:'Pre-Chamber Extraction Fan motor replaced. Old motor tripped breaker QF5151. Root cause: incorrect motor installed (voltage/current mismatch). Changed to proper 120 VAC motor. Breaker no longer trips — fan operating correctly.'}],
      title:'Pre-Chamber Extraction Fan — motor replacement (old one tripped breaker QF5151) — changed to 120 VAC',
      hint:'DONE. Old motor caused trip on QF5151. Replaced with correct 120 VAC motor. Fan operating without trip.'},
     {id:'e26',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 25, 05:00 PM',comments:[{ts:'Mar 25, 05:00 PM',text:'M1501 motor cables (Main Chamber Exhaust Fan) changed and connection corrected. Motor operating correctly with VFD A1501.'}],
      title:'M1501 Main Chamber Exhaust Fan — change motor cables and correct connection',
      hint:'DONE. Motor M1501 cables corrected. Connection fixed. Motor running with VFD A1501.'},
-    {id:'e25',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Mar 25, 03:30 PM',text:'A3.6 Pre-Chamber Start Ventilation (KA9097) in N9021 Page 909: VN cable (neutral) is black — must be WHITE AWG10 per schematic. Same type of error as FG0511/QF5151 (e22). Change cable to enable A3.6 output.'}],
+    {id:'e25',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 9, 04:00 PM',comments:[{ts:'Mar 25, 03:30 PM',text:'A3.6 Pre-Chamber Start Ventilation (KA9097) in N9021 Page 909: VN cable (neutral) is black — must be WHITE AWG10 per schematic. Same type of error as FG0511/QF5151 (e22). Change cable to enable A3.6 output.'},{ts:'Apr 9, 04:00 PM',text:'DONE. VN cable changed from black to white AWG10 on A3.6 KA9097 per schematic Page 909. Pre-Chamber ventilation output now properly wired.'}],
      title:'A3.6 KA9097 Pre-Chamber Ventilation — change VN cable from black to white AWG10',
-     hint:'Cable VN on A3.6 (KA9097) is black with incorrect AWG. Change to white AWG10 per schematic Page 909. Required to enable Pre-Chamber Start Ventilation.'},
+     hint:'DONE. VN cable changed to white AWG10 per schematic Page 909. Pre-Chamber Start Ventilation enabled.'},
 
     {id:'plc7',cat:'PLC',prio:'high',done:true,doneAt:'Mar 23, 11:00 PM',comments:[{ts:'Mar 23, 10:45 PM',text:'Root cause found: DQa and DQb output cables were crossed — all cables shifted by one position, explaining why multiple outputs were not functioning. Also cables 90803 (YV9081A) and 90804 (YV9081B) were swapped/reversed.'},{ts:'Mar 23, 11:00 PM',text:'All outputs verified after rewiring: A2.0 Front Door OPEN (KA9081) OK · A2.1 Front Door CLOSE (KA9082) OK · A2.2 Gasket INFLATE (YV9081A/B) OK · A2.3 Gasket DEFLATE OK · A2.4 Safety Switch By-Pass OK. A2.5 Calibrator UP, A2.6 Calibrator DOWN, A2.7 Front Door UNLOCK — not used in this system, confirmed no connection.'}],
      title:'N9021 DO — verify digital outputs A2.0–A2.7 (door commands) Page 908',
@@ -1329,7 +1349,7 @@ function generateDailyReport() {
   var todayShort = today.toISOString().slice(0,10);
   var catKeys = Object.keys(CAT_META);
   var catColors = {ALARMS:'#ef4444',ELECTRICAL:'#f59e0b',PROGRAMMING:'#3b82f6',MECHANICAL:'#10b981',PLC:'#a855f7'};
-  var catLabels = {ALARMS:'HMI Alarms',ELECTRICAL:'Electrical',PROGRAMMING:'Programming',MECHANICAL:'Mechanical',PLC:'PLC Program'};
+  var catLabels = {ALARMS:'HMI Alarms',ELECTRICAL:'Electrical',PROGRAMMING:'HMI Programming',MECHANICAL:'Mechanical',PLC:'PLC Program'};
   var totalAll=0, doneAll=0, completedTodayCount=0, pendingHighCount=0;
   var statRows='', completedHtml='', pendingHighHtml='', notesHtml='';
 
