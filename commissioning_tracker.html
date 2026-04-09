@@ -333,7 +333,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v159';
+var LS_KEY = 'comecer-v0653-tasks-v161';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -576,8 +576,9 @@ function getDefaults() {
      title:'Connect inlet duct — Main Chamber and Pre-Chamber'},
     {id:'m2',cat:'MECHANICAL',prio:'high',done:false,comments:[],
      title:'Install couplings between inlet hose and manual valve at Main Chamber inlet'},
-    {id:'m3',cat:'MECHANICAL',prio:'med',done:false,comments:[],
-     title:'Install MIP up/down sensors — 3 door sensors (do after door is movable)'},
+    {id:'m3',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Apr 09, 2026',comments:[{ts:'Apr 09, 2026',text:'DONE. 3 door up/down sensors installed on MIP.'}],
+     title:'Install MIP up/down sensors — 3 door sensors (do after door is movable)',
+     hint:'DONE. Sensors installed.'},
     {id:'m4',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Mar 25, 08:00 AM',comments:[{ts:'Mar 25, 08:00 AM',text:'Upstream and downstream fittings connected for filter integrity test. Tubing connected at front testing plate. Ready for HEPA filter integrity testing.'}],
      title:'Connect downstream & upstream air fittings — 2 holes in plate + canister (tubing ready)',
      hint:'DONE. Fittings connected upstream/downstream of integrity test filter and at front testing plate.'},
@@ -632,9 +633,9 @@ function getDefaults() {
     {id:'m17',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 9, 04:00 PM',comments:[{ts:'Apr 9, 04:00 PM',text:'DONE. Metal target bracket fabricated and installed on lateral door frame. Inductive sensor now detects DOOR CLOSED position correctly.'}],
      title:'Lateral door — fabricate and install metal target bracket for inductive sensor',
      hint:'DONE. Steel bracket fabricated and mounted on door frame. Inductive sensor reads closed position. A008 door security interlock dependency resolved.'},
-    {id:'m19',cat:'MECHANICAL',prio:'high',done:false,mach:'BBS',comments:[],
+    {id:'m19',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 09, 2026',mach:'BBS',comments:[{ts:'Apr 09, 2026',text:'DONE. BBS lateral door compartment plug checked and sealed. Confirmed airtight — ready for pressure test, particle counter, SAT and FAT.'}],
      title:'BBS: check and seal lateral door compartment plug — required for pressure test, particle counter, SAT and FAT',
-     hint:'Verify the plug/cap on the BBS lateral door compartment is properly installed and sealed. Machine cannot pass pressure integrity test, particle counter test, SAT or FAT until this compartment is confirmed airtight. Inspect gasket condition on plug, confirm no leaks, and document result before scheduling SAT/FAT.'},
+     hint:'DONE. Plug/cap on BBS lateral door compartment verified installed and sealed. Airtight confirmed.'},
     {id:'m26',cat:'MECHANICAL',prio:'med',done:false,comments:[{ts:'Apr 08, 2026',text:'Apply identification labels to all mechanical and electrical components. Required for maintenance traceability, SAT/FAT documentation, and future service reference.'}],
      title:'Apply identification labels — mechanical components and electrical panels/wiring',
      hint:'Label all mechanical components (solenoid valves, pneumatic fittings, cylinders, sensors) and electrical components (terminal blocks, cable runs, junction boxes, VFDs, relays). Required for SAT/FAT compliance and maintenance documentation.'},
@@ -701,9 +702,9 @@ function getDefaults() {
     {id:'e33',cat:'ELECTRICAL',prio:'medium',done:true,doneAt:'Apr 07, 2026',comments:[{ts:'Apr 02, 11:30 PM',text:'On-site double verification of PAW270 analog output on N9022 (Page 911). PAW270 channels 1M and 1 drive Speed Reference Pre-Chamber Air Extraction Fan via cable A5151W (2x2xAWG22 Sh, 3m). Analog signals: 0-10V cable 91104 (channel 1M) and 0-10V cable 91103 (channel 1). Shields SH9111/SH9112 → 046.2.'},{ts:'Apr 07, 2026',text:'CONFIRMED: PAW270 1M and 1 verified against schematic Page 911. Channel assignment and cable numbers match. Speed reference working correctly.'}],
      title:'Verify PAW270 (Pre-Chamber Extraction) and PAW268 (Main Extraction) channel/cable numbers — N9022 Page 911',
      hint:'DONE. PAW270 1M/1 confirmed matching schematic. Speed reference working.'},
-    {id:'e35',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Apr 09, 2026',text:'Connect ITD door motor to VFD (A1301 / KM1301 per schematic Page 917). Test door operation: verify door goes UP and DOWN in correct direction. If rotation is wrong, swap L1/L2/L3 motor cables at VFD output. After direction confirmed: remove E6.0 and E6.7 jumpers from 24L03 (see e31) and connect actual VFD Ready and Brake Release signals. Note: e31 previously had these jumpered because motor was pneumatic — now switching to electric motor with VFD.'}],
-     title:'Connect ITD door motor to VFD A1301 — test direction, swap L1/L2/L3 if needed',
-     hint:'Connect motor, test up/down direction. If wrong direction swap L1/L2/L3 at VFD output. Then reconnect E6.0 (Inverter Ready) and E6.7 (Brake Release) from VFD instead of 24L03 jumper.'},
+    {id:'e35',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Apr 09, 2026',text:'CORRECTED: This task is for the FRONT DOOR SHIELD (puerta blindada frontal), NOT for ITD. ITD is pneumatic (A1301 removed). Connect front door shield motor to VFD A1201 (already programmed per a01). Test door direction from HMI. If wrong rotation, swap L1/L2/L3 at VFD output. After direction confirmed, verify E0.0 (Inverter Ready from A1201). See also e36 and m27.'},{ts:'Apr 09, 2026',text:'NOTE: Duplicate of e36 — merged into e36. Marking for removal or reassignment.'}],
+     title:'REASSIGNED — See e36: Connect FRONT DOOR shield motor to VFD A1201',
+     hint:'CORRECTED: Was incorrectly labeled as ITD/A1301. ITD is pneumatic. This task is for FRONT DOOR A1201. See e36 for active task.'},
     {id:'e36',cat:'ELECTRICAL',prio:'high',done:false,comments:[{ts:'Apr 09, 2026',text:'Front door shield motor not yet connected to VFD A1201. VFD already programmed (a01 done). Steps: 1) Connect motor power cables to A1201 output. 2) Test door operation — verify door goes UP and DOWN in correct direction from HMI. 3) If rotation is wrong, swap any two of L1/L2/L3 motor cables at VFD output to reverse direction. 4) Verify E0.0 (inverter ready from A1201) goes ON after connection. 5) Verify E2.0 (N9021 ready signal from A1201) also reads correctly. Related: m27 for mechanical sensor verification.'}],
      title:'Connect front door shield motor to VFD A1201 — test direction, swap L1/L2/L3 if wrong',
      hint:'VFD A1201 already programmed. Connect motor, test UP/DOWN direction from HMI. If wrong rotation swap L1/L2/L3 at VFD output. Verify E0.0 and E2.0 inverter ready signals after connection.'},
