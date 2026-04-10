@@ -209,6 +209,7 @@ body:not(.view-mode) .lock-btn{
 <!-- HEADER -->
 <header class="header">
   <div class="header-badge" id="headerBadge">V0653</div>
+  <div class="header-badge" id="versionBadge" style="background:var(--green);font-size:9px;"></div>
   <div>
     <div class="header-title">COMMISSIONING TRACKER</div>
     <div class="header-sub">COMECER INC · MIP-1100 & BBS</div>
@@ -333,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v161';
+var LS_KEY = 'comecer-v0653-tasks-v162';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -928,12 +929,19 @@ async function persist() {
 }
 
 // Boot: render immediately, then try to sync from shared
+function updateVersionBadge() {
+  var m = LS_KEY.match(/v(\d+)$/);
+  var vb = document.getElementById('versionBadge');
+  if (m && vb) vb.textContent = 'v' + m[1];
+}
+
 function boot() {
   var loaded = loadFromLS();
   if (!loaded) {
     tasks = getDefaults();
     saveToLS();
   }
+  updateVersionBadge();
   renderAll();
   // Background sync from shared storage
   loadFromShared().then(function(got) {
