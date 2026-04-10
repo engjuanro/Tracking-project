@@ -334,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v170';
+var LS_KEY = 'comecer-v0653-tasks-v171';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -655,8 +655,9 @@ function getDefaults() {
      title:'MIP — Apply silicone sealant (caulking)'},
     {id:'m14',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Apr 8, 2026',comments:[{ts:'Apr 8, 2026',text:'HMI panel mounted on wall. Done.'}],
      title:'Mount HMI panel on wall'},
-    {id:'m15',cat:'MECHANICAL',prio:'med',done:false,comments:[],
-     title:'Fabricate and install main gasket MIP'},
+    {id:'m15',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Apr 10, 2026',comments:[{ts:'Apr 10, 2026',text:'Front door gaskets installed. Pending: apply adhesive (pegante) to secure permanently. Gasket in place and functional.'}],
+     title:'Fabricate and install main gasket MIP',
+     hint:'DONE. Gaskets installed on front door. Remaining: apply adhesive to secure permanently.'},
     {id:'m16',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 7',comments:[{ts:'Apr 7',text:'SP9032 sensor setpoint reviewed and adjusted. Done.'}],
      title:'Review and adjust setpoint SP9032',
      hint:'DONE. SP9032 sensor setpoint verified and adjusted to match process requirements.'},
