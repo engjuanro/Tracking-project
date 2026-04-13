@@ -334,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v171';
+var LS_KEY = 'comecer-v0653-tasks-v172';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -673,6 +673,9 @@ function getDefaults() {
     {id:'m26',cat:'MECHANICAL',prio:'med',done:false,comments:[{ts:'Apr 08, 2026',text:'Apply identification labels to all mechanical and electrical components. Required for maintenance traceability, SAT/FAT documentation, and future service reference.'}],
      title:'Apply identification labels — mechanical components and electrical panels/wiring',
      hint:'Label all mechanical components (solenoid valves, pneumatic fittings, cylinders, sensors) and electrical components (terminal blocks, cable runs, junction boxes, VFDs, relays). Required for SAT/FAT compliance and maintenance documentation.'},
+    {id:'m27',cat:'MECHANICAL',prio:'high',done:false,comments:[{ts:'Apr 13, 2026',text:'Anti-crush safety bar missing on Main Chamber front door. Must be installed before SAT/FAT — required for safe door operation. Related to A008 alarm (front door security) and FC52 door logic.'}],
+     title:'Install anti-crush safety bar on Main Chamber front door',
+     hint:'Safety bar (barra anti-golpes) not installed on front sliding door. Required for personnel safety — prevents crushing injury during door close operation. Must be installed and wired to PLC input before SAT/FAT acceptance. Verify sensor wiring to N9020/N9021 DI after installation.'},
 
     // ── PLC ─────────────────────────────────────────────────────
     {id:'plc1',cat:'PLC',prio:'high',done:false,comments:[],
