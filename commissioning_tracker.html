@@ -334,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v173';
+var LS_KEY = 'comecer-v0653-tasks-v174';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -424,10 +424,10 @@ function getDefaults() {
      code:'W61',type:'hw-sw',
      title:'FAN STARTS NOT POSSIBLE — ENABLE NOT PRESENT',
      hint:'Warning W61 — Fan enable signal missing. Verify fan enable DI from PLC, check relay output and VFD enable wiring.'},
-    {id:'a17',cat:'ALARMS',prio:'med',done:false,comments:[{ts:'Mar 23, 08:00 PM',text:'Gasket pressure sensor not present on this machine. Need to change PLC logic to manual inflate/deflate mode — bypass sensor interlock in software.'}],
+    {id:'a17',cat:'ALARMS',prio:'med',done:true,doneAt:'Apr 13, 04:00 PM',comments:[{ts:'Mar 23, 08:00 PM',text:'Gasket pressure sensor not present on this machine. Need to change PLC logic to manual inflate/deflate mode — bypass sensor interlock in software.'},{ts:'Apr 13, 04:00 PM',text:'DONE. PLC logic changed from automatic (sensor-based) to manual mode — sensor interlock bypassed in software. W01 cleared. Also investigated ITD gasket SET/RESET fight in FC52 Nw7: A6.2 inflate being SET by timer (E6.2 door closed → TON 2s → SET A6.2) and also by second path (M160.1 AND E0.2 AND M165.0 AND E3.7). Confirmed N9024 I/O: E6.0=ITD Inverter Ready, E6.1=Door Open Switch, E6.2=Door Close Switch, E6.3=Telepneu OK, E6.5=Gasket Pressure, A6.0=Open CMD, A6.1=Close CMD, A6.2=Inflate CMD, A6.3=Deflate CMD, A6.5=Quick Deflation.'}],
      code:'W01',type:'sw',
-     title:'FRONT DOOR GASKET INFLATE NOT POSSIBLE — PANEL NOT PRESENT',
-     hint:'Warning W01 — Gasket inflate blocked because pressure sensor panel is not present. Fix in PLC: change gasket control from automatic (sensor-based) to manual mode, bypassing the sensor interlock.'},
+     title:'W01 — FRONT DOOR GASKET INFLATE NOT POSSIBLE — PANEL NOT PRESENT',
+     hint:'DONE. PLC gasket control changed from automatic (sensor-based) to manual mode. Sensor interlock bypassed in software. W01 cleared.'},
     {id:'a18',cat:'ALARMS',prio:'med',done:true,doneAt:'Mar 28, 08:30 PM',comments:[{ts:'Mar 23, 10:30 PM',text:'Warning W36 active on HMI — interlock bypass is engaged. Investigate which interlock is being bypassed and resolve root cause so bypass can be removed.'},{ts:'Mar 28, 08:30 PM',text:'W36 cleared — interlock bypass removed. No longer active on HMI.'}],
      code:'W36',type:'sw',
      title:'INTERLOCK BYPASS',
