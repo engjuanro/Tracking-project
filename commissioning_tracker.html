@@ -334,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v174';
+var LS_KEY = 'comecer-v0653-tasks-v175';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -746,9 +746,9 @@ function getDefaults() {
      title:'Front door shield VFD A1201 — swap phase cables to reverse motor rotation direction',
      hint:'DONE. Phase cables swapped at A1201 output. Motor rotation direction corrected.'},
 
-    {id:'m27',cat:'MECHANICAL',prio:'high',done:false,comments:[{ts:'Apr 09, 2026',text:'Main door shield (front door) — verify sensor positions and mechanical system. Check N9020 DI: E0.0 (inverter portello/door ready), E0.1 (door open limit switch SQ9011), E0.2 (door close limit switch SQ9012), E0.3 (plexiglass presence BF9013), E0.4 (door in position OK), E0.5 (gasket pressure switch SP9011). Check N9020 DO: A0.0 (open door command), A0.1 (close door command), A0.2 (inflate gasket), A0.3 (deflate gasket). N9021 DI: E2.0 (ready shielded front door inverter A1201). Grease all moving parts (rails, rollers, brake mechanism) — recommended but outside commissioning scope. Coordinate with Comecer mechanical team.'},{ts:'Apr 09, 2026',text:'Verify all limit switches (SQ9011 open, SQ9012 close) are in correct mechanical position and activate at the right door travel points. Check plexiglass presence sensor BF9013 alignment. Check gasket pressure switch SP9011. Recommendation: grease rails, rollers, and brake mechanism for smooth operation — but this is outside commissioning scope, coordinate with Comecer mechanical team or client maintenance.'}],
+    {id:'m28',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 13, 2026',comments:[{ts:'Apr 09, 2026',text:'Main door shield (front door) — verify sensor positions and mechanical system. Check N9020 DI: E0.0 (inverter portello/door ready), E0.1 (door open limit switch SQ9011), E0.2 (door close limit switch SQ9012), E0.3 (plexiglass presence BF9013), E0.4 (door in position OK), E0.5 (gasket pressure switch SP9011). Check N9020 DO: A0.0 (open door command), A0.1 (close door command), A0.2 (inflate gasket), A0.3 (deflate gasket). N9021 DI: E2.0 (ready shielded front door inverter A1201). Grease all moving parts (rails, rollers, brake mechanism) — recommended but outside commissioning scope. Coordinate with Comecer mechanical team.'},{ts:'Apr 09, 2026',text:'Verify all limit switches (SQ9011 open, SQ9012 close) are in correct mechanical position and activate at the right door travel points. Check plexiglass presence sensor BF9013 alignment. Check gasket pressure switch SP9011. Recommendation: grease rails, rollers, and brake mechanism for smooth operation — but this is outside commissioning scope, coordinate with Comecer mechanical team or client maintenance.'},{ts:'Apr 13, 2026',text:'DONE. All sensor positions verified: SQ9011 (open), SQ9012 (close), BF9013 (plexiglass), SP9011 (gasket pressure) — all in correct position and activating at proper door travel points. Mechanical system checked — brake mechanism and travel OK. Grease recommended but out of commissioning scope.'}],
      title:'Front door shield — verify sensor positions, mechanical system, and limit switches (grease recommended but out of scope)',
-     hint:'Verify SQ9011 (open), SQ9012 (close), BF9013 (plexiglass), SP9011 (gasket pressure) positions. Check mechanical travel, brake mechanism. Grease rails/rollers recommended but outside commissioning scope.'},
+     hint:'DONE. All sensors verified: SQ9011, SQ9012, BF9013, SP9011. Mechanical travel and brake OK. Grease recommended but outside scope.'},
 
     // ── DOCUMENTATION ────────────────────────────────────────────
 
