@@ -1509,13 +1509,4 @@ function generateDailyReport() {
   showToast('Daily report downloaded!','success');
 }
 
-function esc(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
-
-// ─────────────────────────────────────────────────────────────
-// BOOT — synchronous, tasks show immediately
-// ─────────────────────────────────────────────────────────────
-boot();
-updateLockBtn();
-</script>
-</body>
-</html>
+function esc(s) { return s ? s.replace(/&/g,'&amp;').replac
