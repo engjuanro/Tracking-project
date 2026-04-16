@@ -334,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v186';
+var LS_KEY = 'comecer-v0653-tasks-v187';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -605,10 +605,12 @@ function getDefaults() {
      hint:'DONE. A004 Spanish text corrected and verified on HMI after import.'},
 
     // ── MECHANICAL ──────────────────────────────────────────────
-    {id:'m1',cat:'MECHANICAL',prio:'high',done:false,comments:[],
-     title:'Connect inlet duct — Main Chamber and Pre-Chamber'},
-    {id:'m2',cat:'MECHANICAL',prio:'high',done:false,comments:[],
-     title:'Install couplings between inlet hose and manual valve at Main Chamber inlet'},
+    {id:'m1',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 15, 2026',comments:[{ts:'Apr 15, 2026',text:'DONE. Inlet duct connected for Main Chamber and Pre-Chamber.'}],
+     title:'Connect inlet duct — Main Chamber and Pre-Chamber',
+     hint:'DONE. Inlet duct connected.'},
+    {id:'m2',cat:'MECHANICAL',prio:'high',done:true,doneAt:'Apr 15, 2026',comments:[{ts:'Apr 15, 2026',text:'DONE. Couplings installed between inlet hose and manual valve at Main Chamber inlet.'}],
+     title:'Install couplings between inlet hose and manual valve at Main Chamber inlet',
+     hint:'DONE. Couplings installed.'},
     {id:'m3',cat:'MECHANICAL',prio:'med',done:true,doneAt:'Apr 09, 2026',comments:[{ts:'Apr 09, 2026',text:'DONE. 3 door up/down sensors installed on MIP.'}],
      title:'Install MIP up/down sensors — 3 door sensors (do after door is movable)',
      hint:'DONE. Sensors installed.'},
