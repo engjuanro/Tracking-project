@@ -334,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v188';
+var LS_KEY = 'comecer-v0653-tasks-v189';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -369,10 +369,10 @@ function getDefaults() {
      code:'A022',type:'hw',
      title:'OVER VOLTAGE SURGE PROTECTOR ALARM',
      hint:'Surge protection device (SPD) tripped or not installed — check, reset or replace.'},
-    {id:'a04',cat:'ALARMS',prio:'high',done:false,comments:[{ts:'Mar 25, 03:00 PM',text:'Persistent alarm confirmed on HMI Mar 25.'},{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.69). A076 — ROOM COMMUNICATION ALARM. Investigate Profinet/Modbus network between chambers.'},{ts:'Mar 28, 08:30 PM',text:'RESOLVED via plc22 — FC91 Nw44 Optional_29 polarity fix. A076 cleared from HMI.'},{ts:'Apr 13, 04:00 PM',text:'ALARM RETURNED — A076 still active on HMI. Previous fix (FC91 Nw44 Optional_29) did not permanently resolve. Reopened. Only 3 alarms remain on HMI: A076, A107, A108.'},{ts:'Apr 13, 06:00 PM',text:'This alarm will be cleared during SAT sensor calibration phase. Room communication depends on calibrated sensor readings being within valid range.'}],
+    {id:'a04',cat:'ALARMS',prio:'high',done:true,doneAt:'Apr 20, 10:00 AM',comments:[{ts:'Mar 25, 03:00 PM',text:'Persistent alarm confirmed on HMI Mar 25.'},{ts:'Mar 27, 04:00 AM',text:'Still active on HMI alarm list (No.69). A076 — ROOM COMMUNICATION ALARM. Investigate Profinet/Modbus network between chambers.'},{ts:'Mar 28, 08:30 PM',text:'RESOLVED via plc22 — FC91 Nw44 Optional_29 polarity fix. A076 cleared from HMI.'},{ts:'Apr 13, 04:00 PM',text:'ALARM RETURNED — A076 still active on HMI. Previous fix (FC91 Nw44 Optional_29) did not permanently resolve. Reopened. Only 3 alarms remain on HMI: A076, A107, A108.'},{ts:'Apr 13, 06:00 PM',text:'This alarm will be cleared during SAT sensor calibration phase. Room communication depends on calibrated sensor readings being within valid range.'},{ts:'Apr 20, 10:00 AM',text:'Marked DONE. Will clear during SAT sensor calibration.'}],
      code:'A076',type:'sw',
      title:'A076 — ROOM COMMUNICATION ALARM',
-     hint:'REOPENED. Previous fix (plc22 FC91 Nw44) did not hold. Expected to clear during SAT sensor calibration.'},
+     hint:'DONE. Expected to fully clear during SAT sensor calibration phase.'},
     {id:'a05',cat:'ALARMS',prio:'high',done:true,doneAt:'Apr 13, 08:00 AM',comments:[{ts:'Mar 23, 07:45 PM',text:'Appeared cleared when LAF fans were off.'},{ts:'Mar 23, 10:30 PM',text:'Alarm returned after LAF fans powered on — was not actually resolved. LAF filter still clogged/missing. Reinstated as pending.'},{ts:'Apr 8, 04:00 AM',text:'LAF HEPA filter NOW INSTALLED. But filter COVER is missing — must be fabricated (see m25). Verify if A077 clears with filter in place. DP sensor reading should normalize once airflow is established through filter.'},{ts:'Apr 13, 08:00 AM',text:'A077 RIGHT LAF FILTER CLOGGING ALARM confirmed active on HMI (No.70) but marked DONE — filter installed, alarm is expected until DP setpoint recalibrated after full airflow established.'}],
      code:'A077',type:'hw',
      title:'A077 — RIGHT LAF FILTER CLOGGING ALARM',
