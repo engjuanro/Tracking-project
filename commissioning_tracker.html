@@ -334,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v187';
+var LS_KEY = 'comecer-v0653-tasks-v188';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -493,9 +493,9 @@ function getDefaults() {
      comments:[{ts:'Mar 21, 02:00 PM',text:'Dipswitches configured on both units. SPDT9041 main chamber and SPDT9042 prechamber done.'}],
      title:'SPDT9041 (Main Chamber) & SPDT9042 (Pre-Chamber) — configure dipswitches',
      hint:'Dipswitch configuration completed on both pressure differential transmitters. Main chamber and pre-chamber units done.'},
-    {id:'e7',cat:'ELECTRICAL',prio:'high',done:false,comments:[],
+    {id:'e7',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Apr 20, 2026',comments:[{ts:'Apr 20, 2026',text:'DONE. Live readings verified on SPDT9041 (Main Chamber) and SPDT9042 (Pre-Chamber). Signals reaching PLC AI card correctly. HMI values match field readings.'}],
      title:'SPDT9041 (Main Chamber) & SPDT9042 (Pre-Chamber) — verify live readings and values',
-     hint:'Dipswitches already configured. Now verify: check live readings on both units match expected process values. Confirm signal is reaching PLC AI card correctly. Compare HMI displayed value vs actual field reading. Document final values.'},
+     hint:'DONE. Dipswitches configured, live readings verified, PLC AI signal confirmed, HMI values match field.'},
     {id:'e8',cat:'ELECTRICAL',prio:'high',done:true,doneAt:'Mar 27, 04:30 AM',comments:[
       {ts:'Mar 21, 02:30 PM',text:'ROOT CAUSE FOUND: All cables on PLC card N9021 were installed swapped — port A connected to port B and vice versa. E2.5 affected along with all other channels on that card. Proceeding to rewire all A-to-B and B-to-A connections to correct positions.'},
       {ts:'Mar 27, 04:30 AM',text:'DONE. N9021 rewiring completed. All A/B port cables swapped to correct positions. HMI Page 90 DI status confirmed — E2.x inputs now reading correctly. E2.5 safety relay signal verified.'}],
