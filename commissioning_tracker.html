@@ -334,7 +334,7 @@ body:not(.view-mode) .lock-btn{
 // CONFIG
 // ─────────────────────────────────────────────────────────────
 var PIN = '1802248';
-var LS_KEY = 'comecer-v0653-tasks-v189';
+var LS_KEY = 'comecer-v0653-tasks-v191';
 
 // SYSTEM INFO — MIP-1100 Cardinal Florida
 // PLC: CPU 1214C DC/DC/DC | Program: MIP_DUAL_LAF_V04_V18 | SW Version: MIP_DUAL_V01
@@ -547,10 +547,10 @@ function getDefaults() {
      comments:[{ts:'Mar 23, 06:30 PM',text:'Same issue as MIP (E15) — BBS receptacles also have hot/neutral reversed. Corrected but pending verification with outlet polarity tester.'},{ts:'Apr 7, 2026',text:'DONE. BBS receptacle polarity verified correct. Hot/neutral wires swapped and confirmed with polarity tester.'}],
      title:'BBS Receptacles: swap hot and neutral wires — reversed polarity (same as E15, pending verification)',
      hint:'BBS receptacle outlets have hot and neutral cables reversed — same issue found in MIP (E15 now fixed). Cables already corrected, pending final verification with outlet polarity tester. Reversed polarity is a shock hazard and NEC 406.4 code violation. Verify and confirm all BBS outlets read correct polarity before sign-off.'},
-    {id:'e19',cat:'ELECTRICAL',prio:'low',done:false,
-     comments:[{ts:'Mar 23, 06:30 PM',text:'MIP wireway cable dressing — same as E17 for BBS. Organize and dress cables for clean aesthetic finish.'}],
+    {id:'e19',cat:'ELECTRICAL',prio:'low',done:true,doneAt:'Apr 20, 2026',
+     comments:[{ts:'Mar 23, 06:30 PM',text:'MIP wireway cable dressing — same as E17 for BBS. Organize and dress cables for clean aesthetic finish.'},{ts:'Apr 20, 2026',text:'Completed. MIP cables routed into wireways and dressed for clean finish.'}],
      title:'MIP: route cables into wireways and dress for clean finish',
-     hint:'Organize all MIP cables into wireways. Bundle neatly, use cable ties/velcro straps, ensure clean aesthetic appearance. Same scope as E17 (BBS) but for the MIP side. Quick task — final cosmetic step before client inspection.'},
+     hint:'DONE. All MIP cables organized into wireways, bundled neatly. Clean finish for client inspection.'},
 
     // ── PROGRAMMING ─────────────────────────────────────────────
     {id:'p1',cat:'PROGRAMMING',prio:'high',done:true,doneAt:'Mar 23, 08:45 PM',comments:[{ts:'Mar 23, 08:45 PM',text:'VFD A1201 (ATV320U15N4C) programmed per A1201_DOOR_M1201.cfg Rev.03. Shielded front door VFD configured and operational.'}],
@@ -650,7 +650,7 @@ function getDefaults() {
      hint:'DONE. Flow restrictors installed on ITD cylinder ports. Door movement is now smooth and controlled — no hard impact on open/close.'},
     {id:'m11',cat:'MECHANICAL',prio:'low',done:false,mach:'BBS',comments:[],
      title:'BBS: clean and organize cables'},
-    {id:'m12',cat:'MECHANICAL',prio:'low',done:false,comments:[],
+    {id:'m12',cat:'MECHANICAL',prio:'low',done:true,doneAt:'Mar 27, 04:30 AM',comments:[{ts:'Mar 27, 04:30 AM',text:'Cables in wireway cleaned and organized.'}],
      title:'MIP — clean cables in wireway'},
     {id:'m13',cat:'MECHANICAL',prio:'low',done:false,comments:[],
      mach:'MIP',
