@@ -756,73 +756,73 @@ function getDefaults() {
     // ── DOCUMENTATION ────────────────────────────────────────────
 
     // 1.2 Use and Maintenance Manual
-    {id:'d1',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.2] Use and Maintenance Manual — UM_CARDINAL_FLORIDA_V0653_R1_ENG. Format: Hardcopy / PDF. Assigned: JJ/Juan. Must incorporate all hardware changes, sensor relocations, and operational procedures modified during commissioning.'}],
+    {id:'d1',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'[1.2] Use and Maintenance Manual — UM_CARDINAL_FLORIDA_V0653_R1_ENG. Format: Hardcopy / PDF. Assigned: JJ/Juan. Must incorporate all hardware changes, sensor relocations, and operational procedures modified during commissioning.'}],
      title:'[1.2] MIP — Use and Maintenance Manual — UM_CARDINAL_FLORIDA_V0653_R1_ENG (Hardcopy/PDF)',
      hint:'Assigned: JJ/Juan. Update manual to reflect as-built configuration and all field modifications.'},
-    {id:'d1b',cat:'DOCUMENTATION',prio:'high',done:false,mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[1.2] Use and Maintenance Manual for BBS machine. Format: Hardcopy / PDF. Assigned: JJ/Juan.'}],
+    {id:'d1b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[1.2] Use and Maintenance Manual for BBS machine. Format: Hardcopy / PDF. Assigned: JJ/Juan.'},{ts:'Apr 27, 2026',text:'DONE. BBS use and maintenance manual complete.'}],
      title:'[1.2] BBS — Use and Maintenance Manual (Hardcopy/PDF)',
-     hint:'Assigned: JJ/Juan. BBS machine use and maintenance manual.'},
+     hint:'DONE. BBS machine use and maintenance manual complete.'},
 
     // 1.4 P&ID
-    {id:'d2',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',comments:[{ts:'Apr 06, 2026',text:'[1.4] P&ID — V0653_PID_r01 — 80FMU00000.05. Format: PDF. Assigned: Juan. Needs update to reflect all field changes from commissioning. Engineering team working on updates.'},{ts:'Apr 27, 2026',text:'DONE — PENDING REVIEWER APPROVAL. Document complete, awaiting review and approval.'}],
-     title:'[1.4] MIP — P&ID — 80FMU00000.05 — V0653_PID_r01 (PDF) — PENDING APPROVAL',
-     hint:'DONE — PENDING APPROVAL. Assigned: Juan. Document complete, awaiting reviewer approval.'},
-    {id:'d2b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.4] P&ID for BBS machine. Format: PDF. Assigned: Juan.'}],
+    {id:'d2',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'[1.4] P&ID — V0653_PID_r01 — 80FMU00000.05. Format: PDF. Assigned: Juan. Needs update to reflect all field changes from commissioning. Engineering team working on updates.'}],
+     title:'[1.4] MIP — P&ID — 80FMU00000.05 — V0653_PID_r01 (PDF)',
+     hint:'Assigned: Juan. Update P&ID 80FMU00000.05 with all commissioning field modifications.'},
+    {id:'d2b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[1.4] P&ID for BBS machine. Format: PDF. Assigned: Juan.'},{ts:'Apr 27, 2026',text:'DONE. BBS P&ID complete.'}],
      title:'[1.4] BBS — P&ID (PDF)',
-     hint:'Assigned: Juan. BBS machine P&ID.'},
+     hint:'DONE. BBS machine P&ID complete.'},
 
     // 1.5 Electrical Schematic
-    {id:'d3',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',comments:[{ts:'Apr 06, 2026',text:'[1.5] Electrical Schematic / Diagram — V0653_ELEC_r01 — 80ZMJ0000F. Assigned: Juan. Redlines in hand. All red-line changes incorporated. PENDING APPROVAL.'},{ts:'Apr 27, 2026',text:'DONE — PENDING REVIEWER APPROVAL. All red-line changes incorporated. Awaiting review and approval.'}],
-     title:'[1.5] MIP — Electrical Schematic / Diagram — 80ZMJ0000F — V0653_ELEC_r01 (PDF) — PENDING APPROVAL',
-     hint:'DONE — PENDING APPROVAL. Assigned: Juan. Document complete, awaiting reviewer approval.'},
-    {id:'d3b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[1.5] Electrical Schematic for BBS machine. Format: PDF. Assigned: Juan.'}],
+    {id:'d3',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'[1.5] Electrical Schematic / Diagram — V0653_ELEC_r01 — 80ZMJ0000F. Assigned: Juan. Redlines in hand. All red-line changes incorporated.'}],
+     title:'[1.5] MIP — Electrical Schematic / Diagram — 80ZMJ0000F — V0653_ELEC_r01 (PDF)',
+     hint:'Assigned: Juan. Update electrical schematic with all red-line changes.'},
+    {id:'d3b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[1.5] Electrical Schematic for BBS machine. Format: PDF. Assigned: Juan.'},{ts:'Apr 27, 2026',text:'DONE. BBS electrical schematic complete.'}],
      title:'[1.5] BBS — Electrical Schematic / Diagram (PDF)',
-     hint:'Assigned: Juan. BBS machine electrical schematic.'},
+     hint:'DONE. BBS machine electrical schematic complete.'},
 
     // 2.1 Operator Panel / Software Manual
-    {id:'d4',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',comments:[{ts:'Apr 06, 2026',text:'[2.1] Operator Panel Manual / Software Manual — UM_SW_CARDINAL_FLORIDA_V0653_R1_ENG. Format: Hardcopy / PDF. Assigned: Juan. Highlight changes. Must reflect all HMI changes, alarm translations, SETUP pages, and PLC SW modifications (SW-001 to SW-032).'},{ts:'Apr 27, 2026',text:'DONE. Software manual updated with all HMI/PLC changes, alarm translations, SETUP pages, and SW modifications.'}],
+    {id:'d4',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'[2.1] Operator Panel Manual / Software Manual — UM_SW_CARDINAL_FLORIDA_V0653_R1_ENG. Format: Hardcopy / PDF. Assigned: Juan. Highlight changes. Must reflect all HMI changes, alarm translations, SETUP pages, and PLC SW modifications (SW-001 to SW-032).'}],
      title:'[2.1] MIP — Operator Panel / Software Manual — UM_SW_CARDINAL_FLORIDA_V0653_R1_ENG (Hardcopy/PDF)',
-     hint:'DONE. Software manual updated with all HMI/PLC changes.'},
-    {id:'d4b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[2.1] Operator Panel Manual / Software Manual for BBS machine. Format: Hardcopy / PDF. Assigned: Juan.'}],
+     hint:'Assigned: Juan. Highlight changes. Update software manual with all HMI/PLC changes.'},
+    {id:'d4b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[2.1] Operator Panel Manual / Software Manual for BBS machine. Format: Hardcopy / PDF. Assigned: Juan.'},{ts:'Apr 27, 2026',text:'DONE. BBS software manual complete.'}],
      title:'[2.1] BBS — Operator Panel / Software Manual (Hardcopy/PDF)',
-     hint:'Assigned: Juan. BBS machine software manual.'},
+     hint:'DONE. BBS machine software manual complete.'},
 
     // 3.1 Data Sheet List
-    {id:'d5',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[3.1] Data Sheet List — DS_CARDINAL_FLORIDA_V0653_R01. Format: PDF. Assigned: JJ. Make equivalencies and file. For both MIP and BBS.'}],
+    {id:'d5',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'[3.1] Data Sheet List — DS_CARDINAL_FLORIDA_V0653_R01. Format: PDF. Assigned: JJ. Make equivalencies and file. For both MIP and BBS.'}],
      title:'[3.1] MIP — Data Sheet List — DS_CARDINAL_FLORIDA_V0653_R01 (PDF)',
      hint:'Assigned: JJ. Make equivalencies and file.'},
-    {id:'d5b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[3.1] Data Sheet List for BBS machine. Format: PDF. Assigned: JJ. Make equivalencies and file.'}],
+    {id:'d5b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[3.1] Data Sheet List for BBS machine. Format: PDF. Assigned: JJ. Make equivalencies and file.'},{ts:'Apr 27, 2026',text:'DONE. BBS data sheet list complete.'}],
      title:'[3.1] BBS — Data Sheet List (PDF)',
-     hint:'Assigned: JJ. Make equivalencies and file.'},
+     hint:'DONE. BBS data sheet list complete.'},
 
     // 3.2 Certificate List
-    {id:'d6',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[3.2] Certificate List — CL_CARDINAL_FLORIDA_V0653_R01. Format: Hardcopy / PDF. Assigned: JJ. Make equivalencies and file.'}],
+    {id:'d6',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'[3.2] Certificate List — CL_CARDINAL_FLORIDA_V0653_R01. Format: Hardcopy / PDF. Assigned: JJ. Make equivalencies and file.'}],
      title:'[3.2] MIP — Certificate List — CL_CARDINAL_FLORIDA_V0653_R01 (Hardcopy/PDF)',
      hint:'Assigned: JJ. Make equivalencies and file.'},
-    {id:'d6b',cat:'DOCUMENTATION',prio:'high',done:false,comments:[{ts:'Apr 06, 2026',text:'[3.2] Certificate List for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. Make equivalencies and file.'}],
+    {id:'d6b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[3.2] Certificate List for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. Make equivalencies and file.'},{ts:'Apr 27, 2026',text:'DONE. BBS certificate list complete.'}],
      title:'[3.2] BBS — Certificate List (Hardcopy/PDF)',
-     hint:'Assigned: JJ. Make equivalencies and file.'},
+     hint:'DONE. BBS certificate list complete.'},
 
     // 4.5 SAT Protocol
-    {id:'d7',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',comments:[{ts:'Apr 06, 2026',text:'[4.5] SAT Protocol — SAT_V0653_r01. Format: Hardcopy / PDF. Assigned: JJ. No leak testing. Document complete. PENDING APPROVAL.'},{ts:'Apr 27, 2026',text:'DONE — PENDING REVIEWER APPROVAL. No leak testing. Document complete, awaiting review and approval.'}],
-     title:'[4.5] MIP — SAT Protocol — SAT_V0653_r01 (Hardcopy/PDF) — PENDING APPROVAL',
-     hint:'DONE — PENDING APPROVAL. Assigned: JJ. No leak testing. Document complete, awaiting reviewer approval.'},
-    {id:'d7b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',comments:[{ts:'Apr 06, 2026',text:'[4.5] SAT Protocol for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. No leak testing. Document complete. PENDING APPROVAL.'},{ts:'Apr 27, 2026',text:'DONE — PENDING REVIEWER APPROVAL. No leak testing. Document complete, awaiting review and approval.'}],
-     title:'[4.5] BBS — SAT Protocol (Hardcopy/PDF) — PENDING APPROVAL',
-     hint:'DONE — PENDING APPROVAL. Assigned: JJ. No leak testing. Document complete, awaiting reviewer approval.'},
+    {id:'d7',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'[4.5] SAT Protocol — SAT_V0653_r01. Format: Hardcopy / PDF. Assigned: JJ. No leak testing.'}],
+     title:'[4.5] MIP — SAT Protocol — SAT_V0653_r01 (Hardcopy/PDF)',
+     hint:'Assigned: JJ. No leak testing. SAT protocol pending.'},
+    {id:'d7b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[4.5] SAT Protocol for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. No leak testing. Document complete.'},{ts:'Apr 27, 2026',text:'DONE. BBS SAT protocol complete.'}],
+     title:'[4.5] BBS — SAT Protocol (Hardcopy/PDF)',
+     hint:'DONE. BBS SAT protocol complete.'},
 
     // 4.6 IOQ Protocol
-    {id:'d8',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',comments:[{ts:'Apr 06, 2026',text:'[4.6] IOQ Protocol — IOQ_V0653_r01. Format: Hardcopy / PDF. Assigned: JJ. Document complete. PENDING APPROVAL.'},{ts:'Apr 27, 2026',text:'DONE — PENDING REVIEWER APPROVAL. Document complete, awaiting review and approval.'}],
-     title:'[4.6] MIP — IOQ Protocol — IOQ_V0653_r01 (Hardcopy/PDF) — PENDING APPROVAL',
-     hint:'DONE — PENDING APPROVAL. Assigned: JJ. Document complete, awaiting reviewer approval.'},
-    {id:'d8b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',comments:[{ts:'Apr 06, 2026',text:'[4.6] IOQ Protocol for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. Document complete. PENDING APPROVAL.'},{ts:'Apr 27, 2026',text:'DONE — PENDING REVIEWER APPROVAL. Document complete, awaiting review and approval.'}],
-     title:'[4.6] BBS — IOQ Protocol (Hardcopy/PDF) — PENDING APPROVAL',
-     hint:'DONE — PENDING APPROVAL. Assigned: JJ. Document complete, awaiting reviewer approval.'},
+    {id:'d8',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'[4.6] IOQ Protocol — IOQ_V0653_r01. Format: Hardcopy / PDF. Assigned: JJ.'}],
+     title:'[4.6] MIP — IOQ Protocol — IOQ_V0653_r01 (Hardcopy/PDF)',
+     hint:'Assigned: JJ. IOQ protocol pending.'},
+    {id:'d8b',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',mach:'BBS',comments:[{ts:'Apr 06, 2026',text:'[4.6] IOQ Protocol for BBS machine. Format: Hardcopy / PDF. Assigned: JJ. Document complete.'},{ts:'Apr 27, 2026',text:'DONE. BBS IOQ protocol complete.'}],
+     title:'[4.6] BBS — IOQ Protocol (Hardcopy/PDF)',
+     hint:'DONE. BBS IOQ protocol complete.'},
 
     // Pneumatic Diagram
-    {id:'d9',cat:'DOCUMENTATION',prio:'high',done:true,doneAt:'Apr 27, 2026',comments:[{ts:'Apr 06, 2026',text:'Pneumatic diagram 80PIX00000.07 MIP FULL LAF needs update with all pneumatic field changes from commissioning.'},{ts:'Apr 27, 2026',text:'DONE — PENDING REVIEWER APPROVAL. Pneumatic diagram updated with all field changes. Awaiting review and approval.'}],
-     title:'MIP — Pneumatic Diagram — 80PIX00000.07 MIP FULL LAF — PENDING APPROVAL',
-     hint:'DONE — PENDING APPROVAL. Pneumatic diagram updated with all commissioning modifications. Awaiting reviewer approval.'},
+    {id:'d9',cat:'DOCUMENTATION',prio:'high',done:false,mach:'MIP',comments:[{ts:'Apr 06, 2026',text:'Pneumatic diagram 80PIX00000.07 MIP FULL LAF needs update with all pneumatic field changes from commissioning.'}],
+     title:'MIP — Pneumatic Diagram — 80PIX00000.07 MIP FULL LAF — update with field changes',
+     hint:'Update pneumatic diagram 80PIX00000.07 with all commissioning pneumatic modifications.'},
 
     // ── PLC I/O VERIFICATION BY MODULE ──────────────────────────
 
